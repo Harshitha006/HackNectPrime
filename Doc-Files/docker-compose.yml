@@ -1,0 +1,465 @@
+version: '3.8'
+
+services:
+  # ===== DATABASES =====
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: hacknect-postgres
+    environment:
+      POSTGRES_USER: hacknect
+      POSTGRES_PASSWORD: hackn3ct_dev_2026
+      POSTGRES_DB: hacknect_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hacknect"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hacknect-network
+
+  mongodb:
+    image: mongo:6
+    container_name: hacknect-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: hacknect
+      MONGO_INITDB_ROOT_PASSWORD: hackn3ct_dev_2026
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hacknect-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: hacknect-redis
+    command: redis-server --requirepass hackn3ct_dev_2026
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hacknect-network
+
+  # ===== MESSAGE QUEUE =====
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: hacknect-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: hacknect
+      RABBITMQ_DEFAULT_PASS: hackn3ct_dev_2026
+      RABBITMQ_DEFAULT_VHOST: hacknect
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - hacknect-network
+
+  # ===== MICROSERVICES =====
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: hacknect-user-service
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_dev}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/user-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  team-service:
+    build:
+      context: ./services/team-service
+      dockerfile: Dockerfile
+    container_name: hacknect-team-service
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      USER_SERVICE_URL: http://user-service:3001
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./services/team-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  matchmaking-service:
+    build:
+      context: ./services/matchmaking-service
+      dockerfile: Dockerfile
+    container_name: hacknect-matchmaking-service
+    environment:
+      ENVIRONMENT: development
+      PORT: 3003
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      PINECONE_ENVIRONMENT: ${PINECONE_ENVIRONMENT:-us-west1-gcp}
+      PINECONE_INDEX: ${PINECONE_INDEX:-hacknect-embeddings}
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./services/matchmaking-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  event-service:
+    build:
+      context: ./services/event-service
+      dockerfile: Dockerfile
+    container_name: hacknect-event-service
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./services/event-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: hacknect-notification-service
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      MONGODB_URI: mongodb://hacknect:hackn3ct_dev_2026@mongodb:27017/hacknect?authSource=admin
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@hacknect.com}
+      FIREBASE_SERVER_KEY: ${FIREBASE_SERVER_KEY}
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./services/notification-service:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  request-service:
+    build:
+      context: ./services/request-service
+      dockerfile: Dockerfile
+    container_name: hacknect-request-service
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      USER_SERVICE_URL: http://user-service:3001
+      TEAM_SERVICE_URL: http://team-service:3002
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./services/request-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  chat-service:
+    build:
+      context: ./services/chat-service
+      dockerfile: Dockerfile
+    container_name: hacknect-chat-service
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      MONGODB_URI: mongodb://hacknect:hackn3ct_dev_2026@mongodb:27017/hacknect?authSource=admin
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      TEAM_SERVICE_URL: http://team-service:3002
+      FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
+    ports:
+      - "3007:3007"
+    volumes:
+      - ./services/chat-service:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: hacknect-analytics-service
+    environment:
+      ENVIRONMENT: development
+      PORT: 3008
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      MONGODB_URI: mongodb://hacknect:hackn3ct_dev_2026@mongodb:27017/hacknect?authSource=admin
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      TEAM_SERVICE_URL: http://team-service:3002
+      CHAT_SERVICE_URL: http://chat-service:3007
+    ports:
+      - "3008:3008"
+    volumes:
+      - ./services/analytics-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  reverse-service:
+    build:
+      context: ./services/reverse-service
+      dockerfile: Dockerfile
+    container_name: hacknect-reverse-service
+    environment:
+      NODE_ENV: development
+      PORT: 3009
+      DATABASE_URL: postgresql://hacknect:hackn3ct_dev_2026@postgres:5432/hacknect_db
+      REDIS_URL: redis://:hackn3ct_dev_2026@redis:6379
+      RABBITMQ_URL: amqp://hacknect:hackn3ct_dev_2026@rabbitmq:5672/hacknect
+      USER_SERVICE_URL: http://user-service:3001
+      TEAM_SERVICE_URL: http://team-service:3002
+      MATCHMAKING_SERVICE_URL: http://matchmaking-service:3003
+    ports:
+      - "3009:3009"
+    volumes:
+      - ./services/reverse-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  # ===== API GATEWAY =====
+  
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: hacknect-gateway
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      USER_SERVICE_URL: http://user-service:3001
+      TEAM_SERVICE_URL: http://team-service:3002
+      MATCHMAKING_SERVICE_URL: http://matchmaking-service:3003
+      EVENT_SERVICE_URL: http://event-service:3004
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      REQUEST_SERVICE_URL: http://request-service:3006
+      CHAT_SERVICE_URL: http://chat-service:3007
+      ANALYTICS_SERVICE_URL: http://analytics-service:3008
+      REVERSE_SERVICE_URL: http://reverse-service:3009
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_dev}
+      RATE_LIMIT_WINDOW_MS: 60000
+      RATE_LIMIT_MAX_REQUESTS: 100
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./gateway:/app
+      - /app/node_modules
+    depends_on:
+      - user-service
+      - team-service
+      - matchmaking-service
+      - event-service
+      - notification-service
+      - request-service
+      - chat-service
+      - analytics-service
+      - reverse-service
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  # ===== FRONTEND =====
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hacknect-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8080/api
+      REACT_APP_WS_URL: ws://localhost:8080
+      REACT_APP_FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      REACT_APP_FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
+      REACT_APP_FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      REACT_APP_FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
+      REACT_APP_FIREBASE_MESSAGING_SENDER_ID: ${FIREBASE_MESSAGING_SENDER_ID}
+      REACT_APP_FIREBASE_APP_ID: ${FIREBASE_APP_ID}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - gateway
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  # ===== MONITORING =====
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hacknect-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: hacknect-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - hacknect-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  hacknect-network:
+    driver: bridge
