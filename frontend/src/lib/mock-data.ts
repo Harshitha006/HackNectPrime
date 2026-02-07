@@ -79,3 +79,33 @@ export const MOCK_USER = {
     interests: ["AI/ML", "HealthTech", "Web3"],
     avatar: "H",
 };
+
+export const MOCK_LEGENDS = [
+    {
+        id: "l1",
+        name: "Quantum Coders",
+        achievement: "Global AI Vision 2024 Winners",
+        score: "99.8",
+        tech: ["PyTorch", "Rust", "CUDA"],
+        avatar: "QC",
+        rank: 1
+    },
+    {
+        id: "l2",
+        name: "Alex Rivera",
+        achievement: "Highest Individual Contribution",
+        score: "2,840 pts",
+        tech: ["Go", "Distributed Systems"],
+        avatar: "AR",
+        rank: 2
+    },
+    {
+        id: "l3",
+        name: "Cyber Sentinel",
+        achievement: "Encryption Protocol Breakthrough",
+        score: "94.5",
+        tech: ["C++", "Blockchain"],
+        avatar: "CS",
+        rank: 3
+    }
+];

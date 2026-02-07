@@ -37,33 +37,20 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = React.useState("");
 
     const handleLogout = () => {
-        toast.info("Terminating session... Identity secured.");
+        toast.info("Logging out...");
         setTimeout(() => router.push('/login'), 1000);
     };
 
     const handleSearch = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && searchQuery) {
-            toast.success(`Scanning network for: ${searchQuery.toUpperCase()}`);
+            toast.success(`Searching for: ${searchQuery}`);
+            router.push(`/events?search=${encodeURIComponent(searchQuery)}`);
             setSearchQuery("");
         }
     };
 
     React.useEffect(() => {
-        const bootSequence = [
-            "Initializing Mission Control...",
-            "Decrypting Tactical Data...",
-            "Neural Link Synchronized.",
-        ];
-
-        bootSequence.forEach((msg, i) => {
-            setTimeout(() => {
-                if (i === bootSequence.length - 1) {
-                    toast.success(msg, { description: "Identity verified: Harshitha_Agent_01" });
-                } else {
-                    toast(msg);
-                }
-            }, i * 600);
-        });
+        toast.success("Welcome back!", { description: "Your dashboard is ready." });
     }, []);
 
     return (
@@ -72,12 +59,12 @@ export default function Dashboard() {
             <div className="fixed bottom-10 right-10 z-[100] flex flex-col items-end space-y-4">
                 <div className="flex flex-col items-end space-y-2 opacity-0 hover:opacity-100 transition-all transform translate-y-4 hover:translate-y-0 group-hover:block hidden group-focus-within:block">
                     {[
-                        { label: "Landing Zone", path: "/", color: "bg-white/10" },
-                        { label: "Auth Sector", path: "/login", color: "bg-white/10" },
+                        { label: "Home", path: "/", color: "bg-white/10" },
+                        { label: "Login", path: "/login", color: "bg-white/10" },
                         { label: "Onboarding", path: "/onboarding", color: "bg-primary/20 text-primary border-primary/30" },
-                        { label: "Intel Feed", path: "/events", color: "bg-white/10" },
-                        { label: "Reverse Hack", path: "/teams/reverse", color: "bg-white/10" },
-                        { label: "Startup Portal", path: "/startup", color: "bg-amber-400/20 text-amber-400 border-amber-400/30" },
+                        { label: "Events", path: "/events", color: "bg-white/10" },
+                        { label: "Teams", path: "/teams/reverse", color: "bg-white/10" },
+                        { label: "Startups", path: "/startup", color: "bg-amber-400/20 text-amber-400 border-amber-400/30" },
                     ].map((phase, i) => (
                         <button
                             key={i}
@@ -118,12 +105,11 @@ export default function Dashboard() {
                 </div>
 
                 <nav className="flex-1 px-4 py-6 space-y-2">
-                    <SidebarItem icon={<LayoutDashboard size={18} />} label="Mission Feed" active />
-                    <SidebarItem icon={<Calendar size={18} />} label="Global Events" onClick={() => router.push('/events')} />
-                    <SidebarItem icon={<UsersIcon size={18} />} label="Reverse Mode" onClick={() => router.push('/teams/reverse')} />
-                    <SidebarItem icon={<Trophy size={18} />} label="Hall of Fame" onClick={() => toast("Elite Database Access Only", { description: "You need 2,500 more alignment points." })} />
+                    <SidebarItem icon={<LayoutDashboard size={18} />} label="Overview" active />
+                    <SidebarItem icon={<Calendar size={18} />} label="Events" onClick={() => router.push('/events')} />
+                    <SidebarItem icon={<UsersIcon size={18} />} label="Find Teams" onClick={() => router.push('/teams/reverse')} />
+                    <SidebarItem icon={<Trophy size={18} />} label="Hall of Fame" onClick={() => router.push('/hall-of-fame')} />
                     <div className="pt-10 px-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-4">Classified Assets</p>
                         <SidebarItem
                             icon={<Sparkles size={18} className="text-amber-400" />}
                             label="Startup Portal"
@@ -161,10 +147,10 @@ export default function Dashboard() {
                                 <TrendingUp size={20} className="text-primary" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-xl font-black italic uppercase tracking-tighter leading-none">Mission <span className="text-primary">Central</span></h1>
+                                <h1 className="text-xl font-black italic uppercase tracking-tighter leading-none">Dashboard</h1>
                                 <div className="flex items-center space-x-2 mt-1">
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500/80">System: Operational</span>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500/80">Active</span>
                                 </div>
                             </div>
                         </div>
@@ -176,7 +162,7 @@ export default function Dashboard() {
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={handleSearch}
-                                    placeholder="SCAN FOR MISSIONS..."
+                                    placeholder="Search events..."
                                     className="bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-[10px] font-black tracking-widest w-72 focus:border-primary/50 focus:bg-white/[0.07] outline-none transition-all"
                                 />
                             </div>
@@ -196,10 +182,10 @@ export default function Dashboard() {
                 <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
                     {/* Stats Bar */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <StatCard label="Compatibility Rank" value="#12" change="+3%" icon={<TrendingUp size={16} />} />
-                        <StatCard label="Active Requests" value="04" change="SECURED" icon={<ShieldCheck size={16} />} />
-                        <StatCard label="Missions Joined" value="02" icon={<Calendar size={16} />} />
-                        <StatCard label="Elite Percentile" value="0.5%" icon={<Trophy size={16} />} />
+                        <StatCard label="Rank" value="#12" change="+3%" icon={<TrendingUp size={16} />} />
+                        <StatCard label="Requests" value="04" change="NEW" icon={<ShieldCheck size={16} />} />
+                        <StatCard label="Events Joined" value="02" icon={<Calendar size={16} />} />
+                        <StatCard label="Score" value="2840" icon={<Trophy size={16} />} />
                     </div>
 
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
@@ -207,14 +193,14 @@ export default function Dashboard() {
                         <div className="xl:col-span-2 space-y-8">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
-                                    <Sparkles size={24} className="text-primary animate-pulse" />
-                                    <span className="text-gradient">Tactical Alignment</span>
+                                    <Sparkles size={24} className="text-primary" />
+                                    <span className="text-gradient">Recommended Teams</span>
                                 </h2>
                                 <button
                                     onClick={() => router.push('/events')}
                                     className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-colors flex items-center"
                                 >
-                                    Expand View <ChevronRight size={14} className="ml-1" />
+                                    See All <ChevronRight size={14} className="ml-1" />
                                 </button>
                             </div>
 
@@ -224,24 +210,57 @@ export default function Dashboard() {
                                         key={team.id}
                                         team={team}
                                         index={idx}
-                                        onRespond={() => setRequestModal({
-                                            isOpen: true,
-                                            teamName: team.name,
-                                            roleNeeded: team.rolesNeeded[0] || "Strategic Member"
-                                        })}
+                                        onClick={() => router.push(`/teams/${team.id}`)}
+                                        onRespond={(e) => {
+                                            e.stopPropagation();
+                                            setRequestModal({
+                                                isOpen: true,
+                                                teamName: team.name,
+                                                roleNeeded: team.rolesNeeded[0] || "Strategic Member"
+                                            });
+                                        }}
                                     />
                                 ))}
+                            </div>
+
+                            {/* Mentorship Alignment Section */}
+                            <div className="pt-12 space-y-8">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
+                                        <UsersIcon size={24} className="text-indigo-400" />
+                                        <span>Mentor Alignment</span>
+                                    </h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <MentorMatchCard
+                                        name="Dr. Aris"
+                                        expertise="AI Ethics & Large Models"
+                                        compatibility="98%"
+                                        avatar="DA"
+                                        onClick={() => toast.success("Request Sent", { description: "Dr. Aris will review your profile shortly." })}
+                                    />
+                                    <MentorMatchCard
+                                        name="Sarah Volt"
+                                        expertise="Cloud Architecture"
+                                        compatibility="85%"
+                                        avatar="SV"
+                                        onClick={() => toast.success("Request Sent", { description: "Sarah Volt has been notified." })}
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         {/* Right Column: Events & Profile */}
                         <div className="space-y-10">
-                            {/* Mission Tracker */}
                             <div className="space-y-6">
-                                <h2 className="text-sm font-black italic uppercase tracking-widest text-white/50 border-l-2 border-primary pl-4">Live Missions</h2>
+                                <h2 className="text-sm font-black italic uppercase tracking-widest text-white/50 border-l-2 border-primary pl-4">Live Events</h2>
                                 <div className="space-y-4">
                                     {MOCK_HACKATHONS.map(event => (
-                                        <EventMiniCard key={event.id} event={event} />
+                                        <EventMiniCard
+                                            key={event.id}
+                                            event={event}
+                                            onClick={() => router.push('/events')}
+                                        />
                                     ))}
                                 </div>
                             </div>
@@ -249,7 +268,7 @@ export default function Dashboard() {
                             {/* Tactical Arsenal Quick View */}
                             <div className="p-8 rounded-[2.5rem] glass border border-white/5 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 group-hover:bg-primary/10 transition-colors" />
-                                <h2 className="text-xs font-black italic uppercase tracking-[0.2em] text-white/90 mb-6">Your Arsenal</h2>
+                                <h2 className="text-xs font-black italic uppercase tracking-[0.2em] text-white/90 mb-6">Skills</h2>
                                 <div className="flex flex-wrap gap-2">
                                     {MOCK_USER.skills.map(skill => (
                                         <span key={skill} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/50 uppercase tracking-widest hover:border-primary/30 hover:text-primary transition-all cursor-default">
@@ -258,10 +277,10 @@ export default function Dashboard() {
                                     ))}
                                 </div>
                                 <div className="pt-8 mt-8 border-t border-white/5">
-                                    <p className="text-[9px] uppercase font-black text-white/20 tracking-[0.3em] mb-4">Core Specialization</p>
+                                    <p className="text-[9px] uppercase font-black text-white/20 tracking-[0.3em] mb-4">Specialization</p>
                                     <div className="flex items-center space-x-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                                        <div className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_12px_rgba(45,212,191,0.5)] animate-pulse" />
-                                        <span className="text-[11px] font-black text-white uppercase tracking-widest">Neural Orchestration</span>
+                                        <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                                        <span className="text-[11px] font-black text-white uppercase tracking-widest">Neural AI</span>
                                     </div>
                                 </div>
                             </div>
@@ -318,14 +337,15 @@ function StatCard({ label, value, change, icon }: { label: string, value: string
     );
 }
 
-function TeamCard({ team, index, onRespond }: { team: any, index: number, onRespond: () => void }) {
+function TeamCard({ team, index, onClick, onRespond }: { team: any, index: number, onClick: () => void, onRespond: (e: any) => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ scale: 1.01 }}
-            className="p-8 rounded-[2.5rem] glass-card flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8 relative group"
+            onClick={onClick}
+            className="p-8 rounded-[2.5rem] glass-card flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8 relative group cursor-pointer"
         >
             <div className="absolute top-0 right-0 w-1 bg-primary/20 h-full rounded-full group-hover:bg-primary transition-colors" />
 
@@ -351,7 +371,7 @@ function TeamCard({ team, index, onRespond }: { team: any, index: number, onResp
                         onClick={onRespond}
                         className="px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-primary/20 active:scale-95"
                     >
-                        Initiate Link
+                        Join Team
                     </button>
                 </div>
 
@@ -374,11 +394,11 @@ function TeamCard({ team, index, onRespond }: { team: any, index: number, onResp
                                 <div key={idx} className="w-8 h-8 rounded-xl bg-white/10 border-2 border-black flex items-center justify-center text-[10px] font-black ring-2 ring-primary/0 group-hover:ring-primary/20 transition-all">{m.avatar}</div>
                             ))}
                         </div>
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Team Composition</span>
+                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Team Members</span>
                     </div>
                     <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest italic flex items-center">
                         <Sparkles size={12} className="mr-2" />
-                        SYNCHRONIZATION: <span className="ml-2 text-white">{team.matchReasons[0]}</span>
+                        Match: <span className="ml-2 text-white">{team.matchReasons[0]}</span>
                     </p>
                 </div>
             </div>
@@ -386,9 +406,12 @@ function TeamCard({ team, index, onRespond }: { team: any, index: number, onResp
     );
 }
 
-function EventMiniCard({ event }: { event: any }) {
+function EventMiniCard({ event, onClick }: { event: any, onClick: () => void }) {
     return (
-        <div className="group p-5 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 hover:bg-white/[0.08] transition-all duration-300 cursor-pointer relative overflow-hidden">
+        <div
+            onClick={onClick}
+            className="group p-5 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 hover:bg-white/[0.08] transition-all duration-300 cursor-pointer relative overflow-hidden"
+        >
             <div className="flex items-center space-x-5 relative z-10">
                 <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500">
                     <img src={event.image} alt={event.name} className="w-full h-full object-cover" />
@@ -412,6 +435,30 @@ function EventMiniCard({ event }: { event: any }) {
                 </div>
             </div>
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+    );
+}
+
+function MentorMatchCard({ name, expertise, compatibility, avatar, onClick }: { name: string, expertise: string, compatibility: string, avatar: string, onClick: () => void }) {
+    return (
+        <div className="p-6 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 flex items-center space-x-6 group hover:bg-indigo-500/10 transition-all cursor-default relative overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-xl font-black text-indigo-400">
+                {avatar}
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-sm font-black uppercase tracking-tight">{name}</h4>
+                    <span className="text-[10px] font-black text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full">{compatibility} Match</span>
+                </div>
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate">{expertise}</p>
+                <button
+                    onClick={onClick}
+                    className="mt-3 text-[9px] font-black text-indigo-400 uppercase tracking-widest hover:text-white transition-colors"
+                >
+                    Contact Mentor ➔
+                </button>
+            </div>
+            <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-400/5 rounded-full blur-2xl -z-10 group-hover:bg-indigo-400/10 transition-colors" />
         </div>
     );
 }

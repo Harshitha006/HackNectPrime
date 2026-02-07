@@ -51,9 +51,9 @@ export default function StartupPortal() {
         toast.promise(
             new Promise((resolve) => setTimeout(resolve, 1500)),
             {
-                loading: 'Initializing Recruitment Pipeline...',
-                success: 'Internship Vision Broadcasted',
-                error: 'Transmission Failure',
+                loading: 'Posting job...',
+                success: 'Job posted successfully!',
+                error: 'Failed to post job.',
             }
         );
     };
@@ -64,7 +64,7 @@ export default function StartupPortal() {
             <div className="bg-amber-400 text-black px-6 py-2 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <Sparkles size={14} className="fill-black" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">HackNect Prime Access Tier</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Prime Access Tier</span>
                 </div>
                 <p className="text-[9px] font-bold">Logged in as <span className="underline">FutureVentures Capital</span></p>
             </div>
@@ -79,14 +79,14 @@ export default function StartupPortal() {
                             <ChevronRight size={20} className="rotate-180" />
                         </button>
                         <Building2 size={20} className="text-amber-400" />
-                        <h1 className="text-xl font-black tracking-tighter uppercase italic">Discovery <span className="text-amber-400">Portal</span></h1>
+                        <h1 className="text-xl font-black tracking-tighter uppercase italic">Startup <span className="text-amber-400">Portal</span></h1>
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
                         <button
                             onClick={() => {
                                 setFilter('Candidates');
-                                toast.info("Switching to Talent Feed");
+                                toast.info("Showing participants");
                             }}
                             className={cn("text-[10px] font-black uppercase tracking-widest transition-all", filter === 'Candidates' ? "text-amber-400" : "text-white/40 hover:text-white")}
                         >
@@ -95,17 +95,17 @@ export default function StartupPortal() {
                         <button
                             onClick={() => {
                                 setFilter('Teams');
-                                toast.info("Switching to Team Intel");
+                                toast.info("Showing teams");
                             }}
                             className={cn("text-[10px] font-black uppercase tracking-widest transition-all", filter === 'Teams' ? "text-amber-400" : "text-white/40 hover:text-white")}
                         >
                             Top Teams
                         </button>
                         <button
-                            onClick={() => toast("Pipeline Synchronized", { description: "12 candidates following your tech stack." })}
+                            onClick={() => toast("Favorites updated")}
                             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-[10px] font-black tracking-widest uppercase transition-all"
                         >
-                            My Pipeline
+                            My Favorites
                         </button>
                     </div>
                 </div>
@@ -115,7 +115,7 @@ export default function StartupPortal() {
                 {/* Recruiter Dashboard Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h2 className="text-4xl font-extrabold tracking-tighter mb-2 italic uppercase">Scout for the <span className="text-amber-400">Next Big Thing</span>.</h2>
+                        <h2 className="text-4xl font-extrabold tracking-tighter mb-2 italic uppercase">Find the <span className="text-amber-400">Next Big Talent</span>.</h2>
                         <p className="text-white/40 font-medium max-w-xl leading-relaxed text-sm">AI-matched candidates based on your tech stack: <span className="text-white/80 underline decoration-amber-400/50 underline-offset-4 font-bold">REACT, NODE.JS, ML</span></p>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -130,7 +130,7 @@ export default function StartupPortal() {
                             />
                         </div>
                         <button
-                            onClick={() => toast.info("Advanced Filters Locked", { description: "Complete 'Investor KYB' to unlock granular filtering." })}
+                            onClick={() => toast.info("Filters Locked", { description: "Verify your account to unlock advanced filtering." })}
                             className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:border-amber-400/30 hover:text-amber-400 transition-all"
                         >
                             <Filter size={18} />
@@ -147,7 +147,7 @@ export default function StartupPortal() {
                             )) : (
                                 <div className="py-20 text-center space-y-4">
                                     <Users size={48} className="text-white/5 mx-auto" />
-                                    <p className="text-xs font-black text-white/20 uppercase tracking-[0.3em]">No Talent Identified in this Sector</p>
+                                    <p className="text-xs font-black text-white/20 uppercase tracking-[0.3em]">No participants found</p>
                                 </div>
                             )
                         ) : (
@@ -166,12 +166,12 @@ export default function StartupPortal() {
                     <div className="space-y-8">
                         <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-amber-400 to-orange-500 text-black shadow-2xl shadow-amber-400/20">
                             <h3 className="text-lg font-black uppercase tracking-tight mb-4 flex items-center justify-between italic">
-                                Active Portal
+                                Dashboard
                                 <Zap size={18} className="fill-black" />
                             </h3>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between border-b border-black/10 pb-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Scanned Profiles</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Profiles Viewed</span>
                                     <span className="text-xl font-black tracking-tighter">1,204</span>
                                 </div>
                                 <div className="flex items-center justify-between border-b border-black/10 pb-2">
@@ -189,12 +189,12 @@ export default function StartupPortal() {
                         </div>
 
                         <div className="p-8 rounded-[2.5rem] glass-card border border-white/5 space-y-6">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400 italic">Match Insights</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400 italic">Insights</h3>
                             <div className="space-y-4">
                                 <div className="p-5 rounded-3xl bg-white/5 border border-white/5 space-y-2 hover:border-amber-400/20 transition-all cursor-default group">
-                                    <p className="text-[9px] font-black tracking-widest opacity-30 uppercase group-hover:opacity-50 transition-opacity">Top Skill Trend</p>
+                                    <p className="text-[9px] font-black tracking-widest opacity-30 uppercase group-hover:opacity-50 transition-opacity">Popular Skill</p>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-black uppercase tracking-tight">LLM Orchestration</span>
+                                        <span className="text-sm font-black uppercase tracking-tight">AI Engineering</span>
                                         <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">+14%</span>
                                     </div>
                                 </div>
@@ -221,8 +221,8 @@ function CandidateCard({ user, index }: { user: any, index: number }) {
         setConnecting(true);
         setTimeout(() => {
             setConnecting(false);
-            toast.success(`Connection Established`, {
-                description: `A direct link has been sent to ${user.name.split(' ')[0]}.`
+            toast.success(`Request Sent`, {
+                description: `We've notified ${user.name.split(' ')[0]}.`
             });
         }, 1200);
     };
@@ -259,7 +259,7 @@ function CandidateCard({ user, index }: { user: any, index: number }) {
                             disabled={connecting}
                             className="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-white text-black transition-all text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
                         >
-                            {connecting ? "Linking..." : "Connect"}
+                            {connecting ? "Sending..." : "Message"}
                         </button>
                     </div>
                 </div>
@@ -268,13 +268,13 @@ function CandidateCard({ user, index }: { user: any, index: number }) {
                     {user.skills.map((skill: string) => (
                         <span key={skill} className="px-3 py-1 rounded-lg bg-amber-400/5 border border-amber-400/10 text-[9px] font-black text-amber-400/80 uppercase tracking-widest">{skill}</span>
                     ))}
-                    <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-white/20 uppercase tracking-widest italic">{user.hackathons} Hacks</span>
+                    <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-white/20 uppercase tracking-widest italic">{user.hackathons} Events</span>
                 </div>
 
                 <div className="pt-4 border-t border-white/5 flex items-center space-x-8">
                     <div className="flex items-center space-x-2">
                         <Award size={14} className="text-amber-400" />
-                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Top 5% Talent</span>
+                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Top Rated</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Github size={14} className="text-white/20" />
@@ -309,7 +309,7 @@ function StartupTeamCard({ team, index }: { team: any, index: number }) {
                         <span>{team.members.length} Members</span>
                     </div>
                     <button
-                        onClick={() => toast.success("Pitch Deck Synchronized", { description: "Streaming secure PDF visualization..." })}
+                        onClick={() => toast.success("Opening pitch deck...")}
                         className="text-[9px] font-black text-amber-400 uppercase tracking-[0.2em] hover:text-white transition-colors"
                     >
                         View Pitch Deck

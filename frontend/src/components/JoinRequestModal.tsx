@@ -62,8 +62,8 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
                                         <Zap size={24} />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Transmission Request</h2>
-                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-0.5">Target: {teamName} // Role: {roleNeeded}</p>
+                                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Join Team</h2>
+                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-0.5">Team: {teamName} // Role: {roleNeeded}</p>
                                     </div>
                                 </div>
                                 <button type="button" onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 text-white/20 hover:text-white transition-all">
@@ -74,31 +74,31 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
                             {/* Form Fields */}
                             <div className="space-y-6">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Tactical Introduction</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Introduction</label>
                                     <div className="relative group">
                                         <MessageSquare size={16} className="absolute left-5 top-5 text-white/20 group-focus-within:text-primary transition-colors" />
                                         <textarea
                                             required
-                                            placeholder="Introduce your engineering core..."
+                                            placeholder="Tell us about yourself..."
                                             className="w-full bg-white/5 border border-white/10 rounded-3xl p-5 pl-14 text-sm text-white focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all h-28 resize-none placeholder:text-white/10"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Mission Contribution</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Why join?</label>
                                     <div className="relative group">
                                         <Sparkles size={16} className="absolute left-5 top-5 text-white/20 group-focus-within:text-primary transition-colors" />
                                         <textarea
                                             required
-                                            placeholder="What assets do you bring to the mission?"
+                                            placeholder="What skills do you bring?"
                                             className="w-full bg-white/5 border border-white/10 rounded-3xl p-5 pl-14 text-sm text-white focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all h-28 resize-none placeholder:text-white/10"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Short Pitch</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Pitch</label>
                                     <div className="relative group">
                                         <Target size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
                                         <input
@@ -113,13 +113,13 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
 
                             {/* Footer */}
                             <div className="pt-4 flex items-center justify-between">
-                                <p className="text-[9px] font-bold text-white/20 italic max-w-[200px]">By submitting, you agree to mission terms and real-time team synchronization protocols.</p>
+                                <p className="text-[9px] font-bold text-white/20 italic max-w-[200px]">By submitting, you agree to our terms and community guidelines.</p>
                                 <button
                                     disabled={submitting}
                                     type="submit"
                                     className="px-8 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center shadow-2xl shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed group"
                                 >
-                                    {submitting ? "Transmitting..." : "Initialize Link"}
+                                    {submitting ? "Sending..." : "Send Request"}
                                     <Send size={16} className="ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                 </button>
                             </div>

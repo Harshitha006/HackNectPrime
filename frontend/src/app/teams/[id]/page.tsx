@@ -18,6 +18,7 @@ import {
 import { MOCK_TEAMS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { SkillHeatmap } from "@/components/SkillHeatmap";
 import { MentorRadar } from "@/components/MentorRadar";
 
@@ -35,6 +36,26 @@ export default function TeamDetail() {
     const [activeTab, setActiveTab] = useState('hub');
 
     const team = MOCK_TEAMS.find(t => t.id === id) || MOCK_TEAMS[0];
+    const [messages, setMessages] = useState([
+        { user: "John Doe", text: "Just committed the initial model architecture", time: "12:04" },
+        { user: "Sarah Smith", text: "Frontend components for data viz are ready", time: "12:15" },
+        { user: "John Doe", text: "Great, let's look at the API integration next", time: "12:16" },
+    ]);
+    const [newMessage, setNewMessage] = useState("");
+    const [hasAlert, setHasAlert] = useState(false);
+
+    const handleSendMessage = () => {
+        if (!newMessage.trim()) return;
+        const msg = { user: "You", text: newMessage, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+        setMessages([...messages, msg]);
+
+        if (newMessage.toLowerCase().includes("not working") || newMessage.toLowerCase().includes("error")) {
+            setHasAlert(true);
+            toast.error("Mentor Notified", { description: "Frustration detected. Analysis complete." });
+        }
+
+        setNewMessage("");
+    };
 
     return (
         <div className="min-h-screen bg-[#050505] text-white flex flex-col">
@@ -58,8 +79,8 @@ export default function TeamDetail() {
                                 <div key={m.name} className="w-8 h-8 rounded-lg bg-indigo-500 border-2 border-black flex items-center justify-center text-[10px] font-bold shadow-lg" title={m.name}>{m.avatar}</div>
                             ))}
                         </div>
-                        <button className="px-4 py-2 rounded-xl bg-primary text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">Invite Members</button>
-                        <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10"><Settings size={18} /></button>
+                        <button onClick={() => toast.info("Link Shared", { description: "Invitations sent to matched candidates." })} className="px-4 py-2 rounded-xl bg-primary text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">Invite Members</button>
+                        <button onClick={() => toast("Settings Locked")} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10"><Settings size={18} /></button>
                     </div>
                 </div>
             </nav>
@@ -110,27 +131,30 @@ export default function TeamDetail() {
                                         </div>
                                     </div>
                                 ))}
-                                <div className="p-4 rounded-3xl border-2 border-dashed border-white/5 flex items-center justify-center space-x-2 text-white/20 hover:text-white/40 cursor-pointer hover:border-white/10 transition-all group">
+                                <div onClick={() => toast.info("Recruitment Active", { description: "Opening slot for next team member." })} className="p-4 rounded-3xl border-2 border-dashed border-white/5 flex items-center justify-center space-x-2 text-white/20 hover:text-white/40 cursor-pointer hover:border-white/10 transition-all group">
                                     <Plus size={16} />
                                     <span className="text-xs font-bold uppercase tracking-widest">New Role</span>
                                 </div>
                             </div>
 
-                            {/* Real-time Feed (Mini Chat) */}
+                            {/* Real-time Feed (Chat) */}
                             <div className="p-6 rounded-[2.5rem] glass-card flex flex-col h-80">
-                                <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-4">Transmission Feed</h3>
+                                <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-4">Team Chat</h3>
                                 <div className="flex-1 space-y-4 overflow-y-auto pr-2 scrollbar-hide">
-                                    <ChatMessage user="John Doe" text="Just committed the initial model architecture" time="12:04" />
-                                    <ChatMessage user="Sarah Smith" text="Frontend components for data viz are ready" time="12:15" />
-                                    <ChatMessage user="John Doe" text="Great, let's look at the API integration next" time="12:16" />
+                                    {messages.map((m, i) => (
+                                        <ChatMessage key={i} user={m.user} text={m.text} time={m.time} />
+                                    ))}
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-white/5 flex items-center space-x-2">
                                     <input
                                         type="text"
-                                        placeholder="Send message to team..."
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-xs focus:border-primary/50 outline-none transition-all"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                        placeholder="Send message to team... (try typing 'not working')"
+                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-xs focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
                                     />
-                                    <button className="p-2 rounded-xl bg-primary shadow-lg shadow-primary/20"><Send size={16} /></button>
+                                    <button onClick={handleSendMessage} className="p-2 rounded-xl bg-primary shadow-lg shadow-primary/20"><Send size={16} /></button>
                                 </div>
                             </div>
                         </div>
@@ -143,11 +167,11 @@ export default function TeamDetail() {
                             </div>
 
                             {/* Mentor Radar */}
-                            <MentorRadar />
+                            <MentorRadar forcedAlert={hasAlert} />
 
                             {/* Important Details */}
                             <div className="p-6 rounded-[2rem] glass-card space-y-4">
-                                <h3 className="text-sm font-bold uppercase tracking-widest">Mission Intel</h3>
+                                <h3 className="text-sm font-bold uppercase tracking-widest">Event Details</h3>
                                 <div className="space-y-3">
                                     <IntelRow icon={<Trophy size={14} />} label="Prize" value="$50,000" />
                                     <IntelRow icon={<Calendar size={14} />} label="Deadline" value="4d 12h" />

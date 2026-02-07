@@ -2,19 +2,23 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Radar, MessageSquare, AlertTriangle, UserPlus, Info, Zap } from "lucide-react";
+import { SkillHeatmap } from "@/components/SkillHeatmap";
 import { cn } from "@/lib/utils";
 
-export function MentorRadar() {
-    const [pulseScale, setPulseScale] = useState(1);
-    const [isAlert, setIsAlert] = useState(false);
+interface MentorRadarProps {
+    forcedAlert?: boolean;
+}
+
+export function MentorRadar({ forcedAlert = false }: MentorRadarProps) {
+    const [status, setStatus] = useState<'nominal' | 'alert' | 'thriving'>('nominal');
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setPulseScale(s => s === 1 ? 1.05 : 1);
-        }, 2000);
-        return () => clearInterval(interval);
-    }, []);
+        if (forcedAlert) {
+            setStatus('alert');
+        }
+    }, [forcedAlert]);
 
     return (
         <div className="p-6 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 relative overflow-hidden group">
@@ -66,8 +70,8 @@ export function MentorRadar() {
                             </div>
                         </div>
 
-                        {!isAlert ? (
-                            <div onClick={() => setIsAlert(true)} className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between group/suggest cursor-pointer">
+                        {status !== 'alert' ? (
+                            <div onClick={() => setStatus('thriving')} className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between group/suggest cursor-pointer">
                                 <div className="flex items-center space-x-3">
                                     <Zap size={16} className="text-emerald-400 animate-bounce" />
                                     <div>
@@ -88,7 +92,10 @@ export function MentorRadar() {
                                     <p className="text-xs font-bold">Struggle Detected</p>
                                 </div>
                                 <p className="text-[10px] text-rose-200/60 leading-relaxed font-medium capitalize">Repeated technical blocks in chat. Suggesting AI Architecture mentor.</p>
-                                <button className="w-full py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-rose-500/20 flex items-center justify-center space-x-2">
+                                <button
+                                    onClick={() => toast.success("Mentor Summoned", { description: "An AI expert has been requested to join your channel." })}
+                                    className="w-full py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-rose-500/20 flex items-center justify-center space-x-2"
+                                >
                                     <UserPlus size={12} />
                                     <span>Request Specialized Mentor</span>
                                 </button>

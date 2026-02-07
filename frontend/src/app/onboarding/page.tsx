@@ -20,9 +20,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const STEPS = [
-    { id: "basic", title: "Identity", icon: User },
-    { id: "skills", title: "Arsenal", icon: Wrench },
-    { id: "interests", title: "Vision", icon: Heart },
+    { id: "basic", title: "Profile", icon: User },
+    { id: "skills", title: "Skills", icon: Wrench },
+    { id: "interests", title: "Interests", icon: Heart },
 ];
 
 interface FormData {
@@ -48,18 +48,16 @@ export default function Onboarding() {
     });
 
     const nextStep = () => {
-        toast.info(`Module Initialization: Step ${currentStep + 2} of 3`);
         setCurrentStep((s: number) => Math.min(s + 1, STEPS.length - 1));
     };
     const prevStep = () => setCurrentStep((s: number) => Math.max(s - 1, 0));
 
     const handleSync = () => {
         setIsSubmitting(true);
-        toast.success("Synchronizing Mission Profile", { description: "Establishing neural link with global matchmaker..." });
-        // Simulate tactical sync
+        toast.success("Saving profile...", { description: "Setting up your HackNect experience." });
         setTimeout(() => {
             setIsSubmitting(false);
-            toast.success("Synchronization Complete", { description: "Welcome to Mission Control, Agent." });
+            toast.success("Welcome!", { description: "You are all set." });
             router.push('/dashboard');
         }, 2000);
     };
@@ -109,12 +107,12 @@ export default function Onboarding() {
                             </div>
                             <div>
                                 <h2 className="text-3xl font-black text-white tracking-tighter italic uppercase">{STEPS[currentStep].title}</h2>
-                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Module Initialization</p>
+                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{STEPS[currentStep].title === "Profile" ? "Basics" : "Details"}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">SECURE ACCESS</span>
-                            <p className="text-[10px] font-mono text-white/20 uppercase tracking-widest mt-1">S-{currentStep + 1} // 03</p>
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">HACKNECT</span>
+                            <p className="text-[10px] font-mono text-white/20 uppercase tracking-widest mt-1">Step {currentStep + 1} of 3</p>
                         </div>
                     </div>
 
@@ -136,11 +134,11 @@ export default function Onboarding() {
                                                 <User size={16} />
                                             </div>
                                         </div>
-                                        <p className="text-[10px] text-white/40 mt-5 uppercase tracking-[0.2em] font-black">Biometric Profile Link</p>
+                                        <p className="text-[10px] text-white/40 mt-5 uppercase tracking-[0.2em] font-black">Profile Picture</p>
                                     </div>
 
                                     <FormGroup
-                                        label="Full Identification"
+                                        label="Full Name"
                                         placeholder="e.g. Alex Hunter"
                                         icon={<User size={18} />}
                                         value={formData.name}
@@ -148,14 +146,14 @@ export default function Onboarding() {
                                     />
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <FormGroup
-                                            label="Core Discipline"
+                                            label="Major"
                                             placeholder="e.g. Computer Science"
                                             icon={<GraduationCap size={18} />}
                                             value={formData.major}
                                             onChange={(val) => setFormData(prev => ({ ...prev, major: val }))}
                                         />
                                         <FormGroup
-                                            label="Clearance Level"
+                                            label="Year of Study"
                                             placeholder="e.g. Senior"
                                             icon={<Settings2 size={18} />}
                                             value={formData.year}
@@ -182,8 +180,8 @@ export default function Onboarding() {
                                         <div className="flex items-start space-x-3">
                                             <Sparkles size={16} className="text-primary mt-0.5 shrink-0" />
                                             <p className="text-[11px] leading-relaxed text-white/50 font-medium">
-                                                <span className="text-primary font-black uppercase tracking-widest mr-2">Intelligence Brief:</span>
-                                                High demand detected for <span className="text-white font-bold italic">RUST</span> and <span className="text-white font-bold italic">TENSORFLOW</span> in the next 48h cycles.
+                                                <span className="text-primary font-black uppercase tracking-widest mr-2">Tip:</span>
+                                                High demand for <span className="text-white font-bold italic">RUST</span> and <span className="text-white font-bold italic">TENSORFLOW</span> this week.
                                             </p>
                                         </div>
                                     </div>
@@ -193,16 +191,16 @@ export default function Onboarding() {
                             {currentStep === 2 && (
                                 <div className="space-y-8">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Vision Statement</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Bio</label>
                                         <textarea
                                             value={formData.bio}
                                             onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                                             className="w-full h-40 bg-white/5 border border-white/10 rounded-3xl p-6 text-white text-sm focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all resize-none font-medium placeholder:text-white/10"
-                                            placeholder="What is your ultimate engineering objective?"
+                                            placeholder="Tell us about yourself..."
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Mission Domains</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Interests</label>
                                         <div className="flex flex-wrap gap-2.5">
                                             {["FinTech", "BioTech", "AeroSpace", "Web3", "CyberSec", "Robotics"].map(i => (
                                                 <span
@@ -243,7 +241,7 @@ export default function Onboarding() {
                             disabled={isSubmitting}
                             className="px-10 h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-[0.2em] flex items-center shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95 group disabled:opacity-50"
                         >
-                            {isSubmitting ? "Syncing..." : (currentStep === STEPS.length - 1 ? "Execute Sync" : "Deploy Logic")}
+                            {isSubmitting ? "Saving..." : (currentStep === STEPS.length - 1 ? "Complete" : "Next")}
                             {!isSubmitting && <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />}
                         </button>
                     </div>

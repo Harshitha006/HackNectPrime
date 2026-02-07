@@ -51,12 +51,12 @@ export default function Home() {
           </div>
 
           <div className="hidden lg:flex items-center space-x-10 text-xs font-black uppercase tracking-widest text-white/50">
-            <Link href="#features" className="hover:text-primary transition-colors hover:scale-105">Capability</Link>
-            <Link href="#missions" className="hover:text-primary transition-colors hover:scale-105">Missions</Link>
-            <Link href="/events" className="hover:text-primary transition-colors hover:scale-105">Intelligence</Link>
+            <Link href="#features" className="hover:text-primary transition-colors hover:scale-105">Features</Link>
+            <Link href="#missions" className="hover:text-primary transition-colors hover:scale-105">Stats</Link>
+            <Link href="/events" className="hover:text-primary transition-colors hover:scale-105">Events</Link>
             <div className="h-4 w-[1px] bg-white/10 mx-2" />
-            <Link href="/login" className="hover:text-white transition-all">Portal Login</Link>
-            <Link href="/signup" className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-all shadow-xl shadow-white/10">Initialize Profile</Link>
+            <Link href="/login" className="hover:text-white transition-all">Login</Link>
+            <Link href="/signup" className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-all shadow-xl shadow-white/10">Get Started</Link>
           </div>
         </div>
       </nav>
@@ -72,14 +72,14 @@ export default function Home() {
             >
               <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-8 animate-pulse">
                 <Stars size={14} className="fill-primary" />
-                <span>AI-Matchmaking Protocol v2.0 Live</span>
+                <span>AI Matching Live</span>
               </div>
               <h1 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-8 leading-[0.9] italic">
                 BUILD YOUR <br />
                 <span className="text-gradient">DREAM TEAM</span>
               </h1>
               <p className="text-lg md:text-xl text-white/50 mb-12 max-w-2xl mx-auto font-medium leading-relaxed uppercase tracking-wide">
-                The world's first AI-orchestrated talent bridge for hackathons. Connect with elite developers, designers, and visionaries based on technical synergy.
+                The AI-powered platform for hackathons. Connect with developers, designers, and innovators and build something amazing together.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -87,14 +87,14 @@ export default function Home() {
                   href="/onboarding"
                   className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-primary/40 flex items-center justify-center group"
                 >
-                  Start Onboarding
+                  Join HackNect
                   <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   href="/events"
                   className="w-full sm:w-auto px-10 py-5 rounded-2xl glass hover:bg-white/5 text-white font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center"
                 >
-                  Explore Missions
+                  Explore Events
                 </Link>
               </div>
             </motion.div>
@@ -113,10 +113,10 @@ export default function Home() {
       <section id="missions" className="border-y border-white/5 bg-white/[0.02] backdrop-blur-sm">
         <div className="container mx-auto px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatItem label="Active Participants" value="24.5k+" />
+            <StatItem label="Participants" value="24.5k+" />
             <StatItem label="Teams Formed" value="8.2k+" />
-            <StatItem label="Missions Hosted" value="450+" />
-            <StatItem label="Prize Pool Tracked" value="$12.4M" />
+            <StatItem label="Events Hosted" value="450+" />
+            <StatItem label="Prize Pool" value="$12.4M" />
           </div>
         </div>
       </section>
@@ -125,8 +125,8 @@ export default function Home() {
       <section id="features" className="py-32 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-24">
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter italic">Tactical Capabilities</h2>
-            <p className="text-white/40 max-w-xl mx-auto font-bold text-xs uppercase tracking-widest leading-loose">Engineered for peak collaborative performance during high-stakes competition.</p>
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter italic">Platform Features</h2>
+            <p className="text-white/40 max-w-xl mx-auto font-bold text-xs uppercase tracking-widest leading-loose">Built to help you find the perfect team and win your next hackathon.</p>
           </div>
 
           <motion.div
@@ -139,22 +139,22 @@ export default function Home() {
             <FeatureCard
               variants={item}
               icon={<BrainCircuit size={32} className="text-primary" />}
-              title="Vector Matchmaking"
-              description="Proprietary similarity algorithms analyze skill-to-vision alignment across our entire participant network."
+              title="AI Matchmaking"
+              description="Our algorithms analyze skills and project goals to find your perfect teammates."
               href="/signup"
             />
             <FeatureCard
               variants={item}
               icon={<Cpu size={32} className="text-teal-400" />}
-              title="Skill Gap Analysis"
-              description="Visual heatmaps reveal team vulnerabilities in real-time, suggesting the exact talent needed to win."
+              title="Team Analysis"
+              description="See skill gaps in your team and get suggestions for members you still need."
               href="/signup"
             />
             <FeatureCard
               variants={item}
               icon={<Globe size={32} className="text-indigo-400" />}
-              title="Mentor Radar"
-              description="Continuous activity monitoring detects technical blockers and instantly bridges the gap to industry experts."
+              title="Mentor Support"
+              description="Connect with industry experts who can help you overcome technical blockers."
               href="/signup"
             />
           </motion.div>
@@ -176,11 +176,11 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-12 border-t border-white/5 mt-auto">
         <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">© 2025 HackNect Global Security. All rights reserved.</p>
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">© 2025 HackNect. All rights reserved.</p>
           <div className="flex items-center space-x-8 text-[10px] font-black uppercase tracking-widest text-white/40">
             <Link href="#" className="hover:text-primary transition-colors">Security</Link>
             <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Terminal</Link>
+            <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
           </div>
         </div>
       </footer>

@@ -14,20 +14,23 @@ import {
     List as ListIcon,
     Zap,
     Tag,
-    Sparkles
+    Sparkles,
+    ExternalLink as ExternalLinkIcon
 } from "lucide-react";
 import { MOCK_HACKATHONS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { Suspense } from "react";
 
-export default function EventsFeed() {
+function EventsContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [view, setView] = useState<'grid' | 'list'>('grid');
     const [filter, setFilter] = useState('All');
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
     const [isOptedIn, setIsOptedIn] = useState(false);
 
     const filteredEvents = MOCK_HACKATHONS.filter(event => {
@@ -42,9 +45,9 @@ export default function EventsFeed() {
         const newState = !isOptedIn;
         setIsOptedIn(newState);
         if (newState) {
-            toast.success("Intelligence Link Established", { description: "You will receive high-priority mission alerts." });
+            toast.success("Alerts enabled", { description: "You will receive notifications for new events." });
         } else {
-            toast.info("Link Severed", { description: "Mission alerts have been silenced." });
+            toast.info("Alerts disabled");
         }
     };
 
@@ -60,7 +63,7 @@ export default function EventsFeed() {
                         >
                             <ChevronLeft size={20} />
                         </button>
-                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Mission <span className="text-primary">Intel</span></h1>
+                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Hack<span className="text-primary">Nect</span> Events</h1>
                     </div>
 
                     <div className="flex items-center space-x-6">
@@ -91,7 +94,6 @@ export default function EventsFeed() {
                                 key={cat}
                                 onClick={() => {
                                     setFilter(cat);
-                                    toast(`Sector Filter: ${cat.toUpperCase()}`, { icon: <Tag size={12} /> });
                                 }}
                                 className={cn(
                                     "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all border",
@@ -110,7 +112,7 @@ export default function EventsFeed() {
                             onClick={handleOptIn}
                             className="flex items-center space-x-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-all group"
                         >
-                            <span className="text-[9px] font-black uppercase tracking-widest text-white/30 group-hover:text-white/50">Mission Alerts</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/30 group-hover:text-white/50">Notifications</span>
                             <div className={cn(
                                 "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
                                 isOptedIn ? "bg-primary" : "bg-white/10"
@@ -132,7 +134,7 @@ export default function EventsFeed() {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="SCAN GLOBAL REGISTRY..."
+                                placeholder="Search events..."
                                 className="w-full md:w-80 bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-6 text-[10px] font-black tracking-widest focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all placeholder:text-white/10"
                             />
                         </div>
@@ -143,7 +145,7 @@ export default function EventsFeed() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    onClick={() => toast.info("Mission Briefing Initiated", { description: "Opening Silicon Valley AI Summit tactical overview." })}
+                    onClick={() => toast.info("Silicon Valley AI Summit", { description: "Opening event details." })}
                     className="relative rounded-[3rem] overflow-hidden group cursor-pointer aspect-[21/9] md:aspect-[3/1] border border-white/5"
                 >
                     <img
@@ -153,8 +155,8 @@ export default function EventsFeed() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent p-10 md:p-16 flex flex-col justify-end">
                         <div className="inline-flex items-center space-x-3 px-4 py-2 rounded-xl bg-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6 w-fit shadow-2xl shadow-primary/50 ring-1 ring-white/20">
-                            <Sparkles size={12} className="animate-pulse" />
-                            <span>Alpha Mission</span>
+                            <Sparkles size={12} />
+                            <span>Featured Event</span>
                         </div>
                         <div className="max-w-3xl">
                             <h2 className="text-4xl md:text-7xl font-black mb-6 tracking-tighter italic uppercase italic leading-none">Silicon Valley <span className="text-primary">AI Summit</span> 2025</h2>
@@ -181,12 +183,12 @@ export default function EventsFeed() {
                     )) : (
                         <div className="col-span-full py-20 text-center space-y-4">
                             <Zap size={48} className="text-white/10 mx-auto" />
-                            <p className="text-sm font-black text-white/20 uppercase tracking-[0.3em]">No Missions Detected in this Sector</p>
+                            <p className="text-sm font-black text-white/20 uppercase tracking-[0.3em]">No events found</p>
                         </div>
                     )}
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
 
@@ -218,7 +220,7 @@ function EventCard({ event, view, index }: { event: any, view: 'grid' | 'list', 
                     <div className="flex items-start justify-between gap-4">
                         <h3 className="text-2xl font-black italic uppercase tracking-tighter leading-tight transition-colors group-hover:text-primary">{event.name}</h3>
                         <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 opacity-0 group-hover:opacity-100 transition-all text-white/40 hover:text-primary hover:border-primary/20">
-                            <ExternalLink size={18} />
+                            <ExternalLinkIcon size={18} />
                         </div>
                     </div>
 
@@ -239,7 +241,7 @@ function EventCard({ event, view, index }: { event: any, view: 'grid' | 'list', 
 
                     <div className="flex flex-wrap gap-2.5 pt-4">
                         <span className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-[9px] font-black text-primary uppercase tracking-[0.2em]">{event.theme}</span>
-                        <span className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/20 uppercase tracking-[0.2em] group-hover:text-white/40 transition-colors">Combat Ready</span>
+                        <span className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/20 uppercase tracking-[0.2em] group-hover:text-white/40 transition-colors">Open</span>
                     </div>
                 </div>
 
@@ -250,12 +252,12 @@ function EventCard({ event, view, index }: { event: any, view: 'grid' | 'list', 
                                 <div key={i} className="w-9 h-9 rounded-xl border-2 border-black bg-white/10 flex items-center justify-center text-[10px] font-black text-white/40 shadow-xl group-hover:border-primary/20 transition-all">+{i}k</div>
                             ))}
                         </div>
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Deployment</span>
+                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Participants</span>
                     </div>
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            toast.success(`Mission Initialized: ${event.name.toUpperCase()}`, { description: "Establishing tactical link..." });
+                            toast.success(`Event: ${event.name}`, { description: "Redirecting to details..." });
                         }}
                         className="w-12 h-12 rounded-xl bg-primary hover:bg-white hover:text-black transition-all shadow-xl shadow-primary/30 flex items-center justify-center group-hover:scale-110 active:scale-95"
                     >
@@ -283,5 +285,12 @@ function ExternalLink({ size }: { size: number }) {
             <polyline points="15 3 21 3 21 9" />
             <line x1="10" y1="14" x2="21" y2="3" />
         </svg>
+    );
+}
+export default function EventsFeed() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#050505] flex items-center justify-center"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <EventsContent />
+        </Suspense>
     );
 }

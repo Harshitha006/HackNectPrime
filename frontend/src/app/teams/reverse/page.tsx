@@ -59,7 +59,7 @@ export default function ReverseHackathon() {
                         >
                             <ChevronLeft size={20} />
                         </button>
-                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Idea <span className="text-primary">First</span></h1>
+                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Project <span className="text-primary">First</span></h1>
                     </div>
                 </div>
             </nav>
@@ -73,7 +73,7 @@ export default function ReverseHackathon() {
                         className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2"
                     >
                         <Sparkles size={12} />
-                        <span>Reverse Hackathon Mode</span>
+                        <span>Project Ideas</span>
                     </motion.div>
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
@@ -81,7 +81,7 @@ export default function ReverseHackathon() {
                         transition={{ delay: 0.1 }}
                         className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none"
                     >
-                        Assemble Around <span className="text-gradient">Pure Vision</span>
+                        Assemble Around <span className="text-gradient">Innovation</span>
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -89,7 +89,7 @@ export default function ReverseHackathon() {
                         transition={{ delay: 0.2 }}
                         className="text-white/40 font-medium max-w-2xl mx-auto leading-relaxed"
                     >
-                        Don't have a team? Start with a concept. The AI will find the engineering core needed to make it reality.
+                        Don't have a team? Start with a concept. The community will help make it a reality.
                     </motion.p>
                 </div>
 
@@ -105,10 +105,10 @@ export default function ReverseHackathon() {
                             <Lightbulb size={200} />
                         </div>
                         <div className="relative z-10 space-y-4 text-left">
-                            <h3 className="text-3xl font-black uppercase italic tracking-tighter">Post a Core Idea</h3>
-                            <p className="text-white/80 font-medium text-sm leading-relaxed">Define the objective, set the tech requirements, and let the scouts find you.</p>
+                            <h3 className="text-3xl font-black uppercase italic tracking-tighter">Post an Idea</h3>
+                            <p className="text-white/80 font-medium text-sm leading-relaxed">Define your project goals, set requirements, and find teammates.</p>
                             <div className="flex items-center space-x-3 text-xs font-black uppercase tracking-widest pt-4 group-hover:translate-x-2 transition-transform">
-                                <span>Initialize Proposal</span>
+                                <span>Create Proposal</span>
                                 <ArrowRight size={16} />
                             </div>
                         </div>
@@ -120,7 +120,7 @@ export default function ReverseHackathon() {
                         onClick={() => {
                             const element = document.getElementById('project-feed');
                             element?.scrollIntoView({ behavior: 'smooth' });
-                            toast.info("Accessing Inventory", { description: "Streaming live project proposals..." });
+                            toast.info("Loading inventory...");
                         }}
                         className="p-10 rounded-[3rem] glass border border-white/5 group hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden shadow-2xl"
                     >
@@ -131,7 +131,7 @@ export default function ReverseHackathon() {
                             <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Join a Concept</h3>
                             <p className="text-white/40 font-medium text-sm leading-relaxed">Browse high-potential project ideas and apply to be a foundational member.</p>
                             <div className="flex items-center space-x-3 text-xs font-black uppercase tracking-widest pt-4 text-primary group-hover:translate-x-2 transition-transform">
-                                <span>Browse Inventory</span>
+                                <span>Browse Ideas</span>
                                 <ArrowRight size={16} />
                             </div>
                         </div>
@@ -143,7 +143,7 @@ export default function ReverseHackathon() {
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-black uppercase italic tracking-tight flex items-center space-x-3">
                             <Zap size={24} className="text-primary" />
-                            <span>Live Proposals</span>
+                            <span>Live Ideas</span>
                         </h3>
                     </div>
 
@@ -175,7 +175,7 @@ function IdeaCard({ idea, index }: { idea: Idea, index: number }) {
         setApplying(true);
         setTimeout(() => {
             setApplying(false);
-            toast.success("Application Transmitted", {
+            toast.success("Application Sent", {
                 description: `Your profile has been shared with ${idea.author}.`
             });
         }, 1500);
@@ -214,7 +214,7 @@ function IdeaCard({ idea, index }: { idea: Idea, index: number }) {
                         <span className="text-lg font-black text-white">{idea.applicants}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Time Buffer</span>
+                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Days Left</span>
                         <span className="text-lg font-black text-rose-400">{idea.daysLeft}d</span>
                     </div>
                     <button
@@ -222,7 +222,7 @@ function IdeaCard({ idea, index }: { idea: Idea, index: number }) {
                         disabled={applying}
                         className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                        {applying ? "Streaming Data..." : "Apply to Founder Core"}
+                        {applying ? "Applying..." : "Join Team"}
                         {!applying && <ArrowRight size={14} className="ml-2 inline-block group-hover:translate-x-1 transition-transform" />}
                     </button>
                 </div>

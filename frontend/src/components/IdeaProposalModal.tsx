@@ -27,8 +27,8 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
         // Simulate network propagation
         setTimeout(() => {
             setSubmitting(false);
-            toast.success("Vision Broadcasted", {
-                description: "AI Scouts are now scanning for compatible engineers."
+            toast.success("Idea Posted", {
+                description: "Your project idea is now live."
             });
             onClose();
         }, 2000);
@@ -60,8 +60,8 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                         <Lightbulb size={24} />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Initialize Vision</h2>
-                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-0.5">Core Proposal Protocol v1.0</p>
+                                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Post an Idea</h2>
+                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-0.5">Share your project with the community</p>
                                     </div>
                                 </div>
                                 <button type="button" onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 text-white/20 hover:text-white transition-all">
@@ -72,7 +72,7 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-6 md:col-span-2">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Vision Title</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Project Title</label>
                                         <div className="relative group">
                                             <Target size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber-400 transition-colors" />
                                             <input
@@ -85,7 +85,7 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Strategic Objective</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Description</label>
                                         <textarea
                                             required
                                             placeholder="Define the problem you are solving..."
@@ -95,7 +95,7 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Arsenal Requirements</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Skills Needed</label>
                                     <div className="relative group">
                                         <Code size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber-400 transition-colors" />
                                         <input
@@ -108,13 +108,13 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Deployment Timeline</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Timeline</label>
                                     <div className="relative group">
                                         <Shield size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber-400 transition-colors" />
                                         <select className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm text-white/60 focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all appearance-none">
-                                            <option>24H Sprint</option>
-                                            <option>48H Tactical</option>
-                                            <option>72H Endurance</option>
+                                            <option>24 Hours</option>
+                                            <option>48 Hours</option>
+                                            <option>72 Hours</option>
                                         </select>
                                     </div>
                                 </div>
@@ -123,14 +123,14 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                             <div className="pt-6 flex items-center justify-between border-t border-white/5">
                                 <div className="flex items-center space-x-3 text-amber-400/40">
                                     <Sparkles size={14} className="animate-pulse" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest italic">AI Optimization Active</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest italic">Matching Active</span>
                                 </div>
                                 <button
                                     disabled={submitting}
                                     type="submit"
                                     className="px-10 py-4 bg-amber-400 text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center shadow-2xl shadow-amber-400/20 disabled:opacity-50 disabled:cursor-not-allowed group"
                                 >
-                                    {submitting ? "Broadcasting..." : "Broadcast Vision"}
+                                    {submitting ? "Posting..." : "Post Idea"}
                                     <Send size={16} className="ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                 </button>
                             </div>

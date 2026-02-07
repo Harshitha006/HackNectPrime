@@ -87,18 +87,18 @@ export function NotificationCenter() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsOpen(false)}
-                            className="fixed inset-0 z-40"
+                            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
                         />
                         <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute right-0 mt-4 w-96 max-h-[600px] overflow-hidden glass border border-white/10 rounded-[2.5rem] shadow-2xl z-50 flex flex-col"
+                            className="absolute right-0 mt-4 w-96 max-h-[600px] overflow-hidden bg-[#0c0c0c] border border-white/10 rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[101] flex flex-col"
                         >
                             <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-white">Transmission Center</h3>
-                                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1">Real-time Intel Feed</p>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-white">Notifications</h3>
+                                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1">Recent Activity</p>
                                 </div>
                                 <div className="p-1 px-3 rounded-xl bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase">
                                     {unreadCount} New
@@ -117,13 +117,18 @@ export function NotificationCenter() {
                                 ) : (
                                     <div className="py-12 text-center space-y-4">
                                         <Zap size={32} className="text-white/10 mx-auto" />
-                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">No Active Transmissions</p>
+                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">No notifications</p>
                                     </div>
                                 )}
                             </div>
 
                             <div className="p-4 bg-white/[0.02] border-t border-white/5 flex items-center justify-center">
-                                <button className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] hover:text-white transition-colors">Clear All Intel</button>
+                                <button
+                                    onClick={() => setNotifications([])}
+                                    className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] hover:text-white transition-colors"
+                                >
+                                    Clear All
+                                </button>
                             </div>
                         </motion.div>
                     </>
