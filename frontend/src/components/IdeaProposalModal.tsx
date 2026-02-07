@@ -18,20 +18,51 @@ interface IdeaProposalModalProps {
     onClose: () => void;
 }
 
-export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
-    const [submitting, setSubmitting] = useState(false);
+import { useAuth } from "@/contexts/AuthContext";
+import { firestoreService } from "@/hooks/useFirestore";
 
-    const handleSubmit = (e: React.FormEvent) => {
+export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
+    const { user, profile } = useAuth();
+    const [submitting, setSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        skills: "",
+        timeline: "48 Hours"
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user) {
+            toast.error("Authentication Required");
+            return;
+        }
+
         setSubmitting(true);
-        // Simulate network propagation
-        setTimeout(() => {
-            setSubmitting(false);
-            toast.success("Idea Posted", {
-                description: "Your project idea is now live."
+        try {
+            await firestoreService.createTeam({
+                name: formData.title,
+                description: formData.description,
+                projectIdea: formData.description,
+                skillsNeeded: formData.skills.split(',').map(s => s.trim()),
+                rolesNeeded: ["Lead Developer", "Visionary"],
+                status: "forming",
+                adminId: user.uid,
+                currentMembers: [user.uid],
+                hackathonId: "global-ai-hackathon-2025" // Default for now
+            });
+
+            toast.success("Project Seeded", {
+                description: "Your vision is now part of the global network."
             });
             onClose();
-        }, 2000);
+            setFormData({ title: "", description: "", skills: "", timeline: "48 Hours" });
+        } catch (error) {
+            console.error("Idea posting error:", error);
+            toast.error("Neural uplink failed. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -78,6 +109,8 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                             <input
                                                 required
                                                 type="text"
+                                                value={formData.title}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                                                 placeholder="e.g. Neural Mesh Network"
                                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm text-white focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all placeholder:text-white/10"
                                             />
@@ -88,6 +121,8 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Description</label>
                                         <textarea
                                             required
+                                            value={formData.description}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                             placeholder="Define the problem you are solving..."
                                             className="w-full bg-white/5 border border-white/10 rounded-[2rem] p-6 text-sm text-white focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all h-32 resize-none placeholder:text-white/10"
                                         />
@@ -101,6 +136,8 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                         <input
                                             required
                                             type="text"
+                                            value={formData.skills}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, skills: e.target.value }))}
                                             placeholder="e.g. Rust, Go, WASM"
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm text-white focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all placeholder:text-white/10"
                                         />
@@ -111,7 +148,11 @@ export function IdeaProposalModal({ isOpen, onClose }: IdeaProposalModalProps) {
                                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2 italic">Timeline</label>
                                     <div className="relative group">
                                         <Shield size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber-400 transition-colors" />
-                                        <select className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm text-white/60 focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all appearance-none">
+                                        <select
+                                            value={formData.timeline}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, timeline: e.target.value }))}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm text-white/60 focus:border-amber-400/50 focus:bg-white/[0.08] outline-none transition-all appearance-none"
+                                        >
                                             <option>24 Hours</option>
                                             <option>48 Hours</option>
                                             <option>72 Hours</option>

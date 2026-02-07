@@ -56,13 +56,26 @@ const MOCK_NOTIFICATIONS: Notification[] = [
     }
 ];
 
-export function NotificationCenter() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-    const unreadCount = notifications.filter(n => !n.read).length;
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useReceivedRequests, firestoreService } from "@/hooks/useFirestore";
+import { JoinRequest } from "@/types/firebase";
 
-    const markAsRead = (id: string) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+export function NotificationCenter() {
+    const { user } = useAuth();
+    const { requests: receivedRequests, loading: requestsLoading } = useReceivedRequests(user?.uid || "");
+    const [isOpen, setIsOpen] = useState(false);
+
+    const pendingRequests = receivedRequests.filter(r => r.status === 'pending');
+    const unreadCount = pendingRequests.length;
+
+    const handleAction = async (requestId: string, status: 'accepted' | 'rejected') => {
+        try {
+            await firestoreService.updateRequestStatus(requestId, status);
+            toast.success(`Request ${status === 'accepted' ? 'accepted' : 'denied'}`);
+        } catch (error) {
+            toast.error("Process failed. Neural link unstable.");
+        }
     };
 
     return (
@@ -106,28 +119,29 @@ export function NotificationCenter() {
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                                {notifications.length > 0 ? (
-                                    notifications.map((n) => (
+                                {pendingRequests.length > 0 ? (
+                                    pendingRequests.map((request) => (
                                         <NotificationItem
-                                            key={n.id}
-                                            notification={n}
-                                            onRead={() => markAsRead(n.id)}
+                                            key={request.id}
+                                            request={request}
+                                            onAccept={() => handleAction(request.id, 'accepted')}
+                                            onDeny={() => handleAction(request.id, 'rejected')}
                                         />
                                     ))
                                 ) : (
                                     <div className="py-12 text-center space-y-4">
                                         <Zap size={32} className="text-white/10 mx-auto" />
-                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">No notifications</p>
+                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">No pending requests</p>
                                     </div>
                                 )}
                             </div>
 
                             <div className="p-4 bg-white/[0.02] border-t border-white/5 flex items-center justify-center">
                                 <button
-                                    onClick={() => setNotifications([])}
+                                    onClick={() => toast.info("History Log", { description: "Verified request history." })}
                                     className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] hover:text-white transition-colors"
                                 >
-                                    Clear All
+                                    View History
                                 </button>
                             </div>
                         </motion.div>
@@ -138,57 +152,42 @@ export function NotificationCenter() {
     );
 }
 
-function NotificationItem({ notification, onRead }: { notification: Notification, onRead: () => void }) {
-    const icons = {
-        request: <UserPlus size={14} />,
-        match: <Zap size={14} />,
-        announcement: <Briefcase size={14} />,
-        alert: <AlertCircle size={14} />,
-        system: <Star size={14} />
-    };
-
-    const colors = {
-        request: "text-primary bg-primary/10 border-primary/20",
-        match: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-        announcement: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-        alert: "text-rose-400 bg-rose-500/10 border-rose-500/20",
-        system: "text-white/40 bg-white/5 border-white/10"
-    };
+function NotificationItem({ request, onAccept, onDeny }: { request: JoinRequest, onAccept: () => void, onDeny: () => void }) {
+    const timeAgo = request.timestamp ? "Recent" : "Just now"; // Simplification for now
 
     return (
         <div
-            className={cn(
-                "p-5 rounded-[1.5rem] border transition-all cursor-pointer group relative overflow-hidden",
-                notification.read ? "bg-transparent border-white/5 opacity-60" : "bg-white/5 border-white/10 hover:border-primary/30"
-            )}
-            onClick={onRead}
+            className="p-5 rounded-[1.5rem] border transition-all bg-white/5 border-white/10 hover:border-primary/30 group relative overflow-hidden"
         >
             <div className="flex items-start space-x-4">
-                <div className={cn("shrink-0 p-2.5 rounded-xl border", colors[notification.type])}>
-                    {icons[notification.type]}
+                <div className="shrink-0 p-2.5 rounded-xl border text-primary bg-primary/10 border-primary/20">
+                    <UserPlus size={14} />
                 </div>
                 <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-black uppercase tracking-tight text-white/80 group-hover:text-primary transition-colors">{notification.title}</p>
-                        <span className="text-[9px] font-bold text-white/20">{notification.time}</span>
+                        <p className="text-[11px] font-black uppercase tracking-tight text-white/80 group-hover:text-primary transition-colors">Join Request</p>
+                        <span className="text-[9px] font-bold text-white/20">{timeAgo}</span>
                     </div>
-                    <p className="text-xs text-white/40 leading-relaxed font-medium">{notification.message}</p>
+                    <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">Role: {request.roleApplyingFor}</p>
+                    <p className="text-xs text-white/40 leading-relaxed font-medium line-clamp-2">{request.message}</p>
 
-                    {!notification.read && notification.type === 'request' && (
-                        <div className="flex items-center space-x-2 pt-3">
-                            <button className="flex-1 py-1.5 rounded-lg bg-primary text-[9px] font-black uppercase tracking-widest text-white hover:bg-primary/90 transition-all flex items-center justify-center space-x-2">
-                                <Check size={10} /> <span>Accept</span>
-                            </button>
-                            <button className="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all flex items-center justify-center space-x-2">
-                                <X size={10} /> <span>Deny</span>
-                            </button>
-                        </div>
-                    )}
+                    <div className="flex items-center space-x-2 pt-3">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAccept(); }}
+                            className="flex-1 py-1.5 rounded-lg bg-primary text-[9px] font-black uppercase tracking-widest text-white hover:bg-primary/90 transition-all flex items-center justify-center space-x-2"
+                        >
+                            <Check size={10} /> <span>Accept</span>
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onDeny(); }}
+                            className="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all flex items-center justify-center space-x-2"
+                        >
+                            <X size={10} /> <span>Deny</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            {!notification.read && (
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary shadow-lg shadow-primary/50" />
-            )}
+            <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary shadow-lg shadow-primary/50" />
         </div>
     );
 }

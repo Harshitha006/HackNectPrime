@@ -19,6 +19,7 @@ import {
 import { MOCK_TEAMS, MOCK_USER } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Team } from "@/types/firebase";
 
 const MOCK_CANDIDATES = [
     { ...MOCK_USER, id: "u1", school: "Stanford University", gradYear: "2026", hackathons: 12, activity: "Very High" },
@@ -28,9 +29,11 @@ const MOCK_CANDIDATES = [
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTeams } from "@/hooks/useFirestore";
 
 export default function StartupPortal() {
     const router = useRouter();
+    const { teams, loading: teamsLoading } = useTeams();
     const [filter, setFilter] = useState('Candidates');
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -41,10 +44,10 @@ export default function StartupPortal() {
         u.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-    const filteredTeams = MOCK_TEAMS.filter(t =>
+    const filteredTeams = (teams || []).filter(t =>
         t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.techStack.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+        (t.skillsNeeded || []).some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const handlePostInternship = () => {
@@ -151,7 +154,11 @@ export default function StartupPortal() {
                                 </div>
                             )
                         ) : (
-                            filteredTeams.length > 0 ? filteredTeams.map((t, idx) => (
+                            teamsLoading ? (
+                                <div className="py-20 text-center space-y-4">
+                                    <p className="text-xs font-black text-amber-400 uppercase tracking-[0.3em] animate-pulse">Scanning Potential Acquisitions...</p>
+                                </div>
+                            ) : filteredTeams.length > 0 ? filteredTeams.map((t, idx) => (
                                 <StartupTeamCard key={t.id} team={t} index={idx} />
                             )) : (
                                 <div className="py-20 text-center space-y-4">
@@ -286,7 +293,7 @@ function CandidateCard({ user, index }: { user: any, index: number }) {
     );
 }
 
-function StartupTeamCard({ team, index }: { team: any, index: number }) {
+function StartupTeamCard({ team, index }: { team: Team, index: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -306,7 +313,7 @@ function StartupTeamCard({ team, index }: { team: any, index: number }) {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
                     <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-white/30">
                         <Users size={12} />
-                        <span>{team.members.length} Members</span>
+                        <span>{(team.currentMembers || []).length} Members</span>
                     </div>
                     <button
                         onClick={() => toast.success("Opening pitch deck...")}

@@ -11,25 +11,59 @@ import {
     Target,
     Users
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { firestoreService } from "@/hooks/useFirestore";
 
 interface JoinRequestModalProps {
     isOpen: boolean;
     onClose: () => void;
+    teamId: string;
+    teamAdminId: string;
     teamName: string;
     roleNeeded: string;
 }
 
-export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: JoinRequestModalProps) {
+export function JoinRequestModal({ isOpen, onClose, teamId, teamAdminId, teamName, roleNeeded }: JoinRequestModalProps) {
+    const { user } = useAuth();
     const [submitting, setSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        intro: "",
+        why: "",
+        pitch: ""
+    });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user) {
+            toast.error("Please login to join teams");
+            return;
+        }
+
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
+        try {
+            const fullMessage = `Intro: ${formData.intro}\n\nWhy: ${formData.why}\n\nPitch: ${formData.pitch}`;
+
+            await firestoreService.sendJoinRequest({
+                fromUserId: user.uid,
+                toTeamId: teamId,
+                toAdminId: teamAdminId,
+                message: fullMessage,
+                roleApplyingFor: roleNeeded,
+                status: "pending"
+            });
+
+            toast.success("Request Broadcast Sent!", {
+                description: "Your profile has been shared with the team leads."
+            });
             onClose();
-        }, 1500);
+            setFormData({ intro: "", why: "", pitch: "" });
+        } catch (error) {
+            console.error("Join request error:", error);
+            toast.error("Failed to transmit request. Please retry.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -79,6 +113,8 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
                                         <MessageSquare size={16} className="absolute left-5 top-5 text-white/20 group-focus-within:text-primary transition-colors" />
                                         <textarea
                                             required
+                                            value={formData.intro}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, intro: e.target.value }))}
                                             placeholder="Tell us about yourself..."
                                             className="w-full bg-white/5 border border-white/10 rounded-3xl p-5 pl-14 text-sm text-white focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all h-28 resize-none placeholder:text-white/10"
                                         />
@@ -91,6 +127,8 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
                                         <Sparkles size={16} className="absolute left-5 top-5 text-white/20 group-focus-within:text-primary transition-colors" />
                                         <textarea
                                             required
+                                            value={formData.why}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, why: e.target.value }))}
                                             placeholder="What skills do you bring?"
                                             className="w-full bg-white/5 border border-white/10 rounded-3xl p-5 pl-14 text-sm text-white focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all h-28 resize-none placeholder:text-white/10"
                                         />
@@ -104,6 +142,8 @@ export function JoinRequestModal({ isOpen, onClose, teamName, roleNeeded }: Join
                                         <input
                                             required
                                             type="text"
+                                            value={formData.pitch}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, pitch: e.target.value }))}
                                             placeholder="Your 1-line elevator pitch..."
                                             className="w-full bg-white/5 border border-white/10 rounded-3xl py-4 pl-14 pr-6 text-sm text-white focus:border-primary/50 focus:bg-white/[0.08] outline-none transition-all placeholder:text-white/10"
                                         />

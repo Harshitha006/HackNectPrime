@@ -15,12 +15,17 @@ import {
     Calendar,
     Layout
 } from "lucide-react";
-import { MOCK_TEAMS } from "@/lib/mock-data";
+import { MOCK_HACKATHONS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { SkillHeatmap } from "@/components/SkillHeatmap";
 import { MentorRadar } from "@/components/MentorRadar";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/services/firebase";
+import { Team } from "@/types/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { firestoreService } from "@/hooks/useFirestore";
 
 const SKILLS_ANALYSIS = [
     { skill: "Python / ML", coverage: 0.9, ideal: 0.8 },
@@ -33,9 +38,35 @@ const SKILLS_ANALYSIS = [
 export default function TeamDetail() {
     const { id } = useParams();
     const router = useRouter();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('hub');
+    const [team, setTeam] = useState<Team | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const team = MOCK_TEAMS.find(t => t.id === id) || MOCK_TEAMS[0];
+    const handleLeaveTeam = async () => {
+        if (!user || !team) return;
+        try {
+            await firestoreService.leaveTeam(team.id, user.uid);
+            toast.success("Squad Vacated", { description: "You have disconnected from the team's neural network." });
+            router.push('/dashboard');
+        } catch (error) {
+            toast.error("Decoupling failed. System override required.");
+        }
+    };
+
+    const handleDisbandTeam = async () => {
+        if (!team) return;
+        if (!confirm("CRITICAL: This will incinerate all team data. Proceed?")) return;
+
+        try {
+            await firestoreService.disbandTeam(team.id);
+            toast.success("Team Disbanded", { description: "The project has been archived." });
+            router.push('/dashboard');
+        } catch (error) {
+            toast.error("Archival failed. Core remains active.");
+        }
+    };
+
     const [messages, setMessages] = useState([
         { user: "John Doe", text: "Just committed the initial model architecture", time: "12:04" },
         { user: "Sarah Smith", text: "Frontend components for data viz are ready", time: "12:15" },
@@ -43,6 +74,19 @@ export default function TeamDetail() {
     ]);
     const [newMessage, setNewMessage] = useState("");
     const [hasAlert, setHasAlert] = useState(false);
+
+    React.useEffect(() => {
+        if (!id) return;
+
+        const unsubscribe = onSnapshot(doc(db, "teams", id as string), (doc) => {
+            if (doc.exists()) {
+                setTeam({ id: doc.id, ...doc.data() } as Team);
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [id]);
 
     const handleSendMessage = () => {
         if (!newMessage.trim()) return;
@@ -56,6 +100,23 @@ export default function TeamDetail() {
 
         setNewMessage("");
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center font-black uppercase tracking-widest animate-pulse">
+                Synchronizing with Team Node...
+            </div>
+        );
+    }
+
+    if (!team) {
+        return (
+            <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center space-y-4">
+                <h2 className="text-2xl font-black uppercase">Team Not Found</h2>
+                <button onClick={() => router.push('/dashboard')} className="px-6 py-2 bg-primary rounded-xl font-bold">Return to Dashboard</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#050505] text-white flex flex-col">
@@ -75,12 +136,29 @@ export default function TeamDetail() {
 
                     <div className="flex items-center space-x-3">
                         <div className="hidden md:flex -space-x-2 mr-4">
-                            {team.members.map(m => (
-                                <div key={m.name} className="w-8 h-8 rounded-lg bg-indigo-500 border-2 border-black flex items-center justify-center text-[10px] font-bold shadow-lg" title={m.name}>{m.avatar}</div>
+                            {(team.currentMembers || []).map((mId: string) => (
+                                <div key={mId} className="w-8 h-8 rounded-lg bg-indigo-500 border-2 border-black flex items-center justify-center text-[10px] font-bold shadow-lg" title={mId}>{mId[0].toUpperCase()}</div>
                             ))}
                         </div>
-                        <button onClick={() => toast.info("Link Shared", { description: "Invitations sent to matched candidates." })} className="px-4 py-2 rounded-xl bg-primary text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">Invite Members</button>
-                        <button onClick={() => toast("Settings Locked")} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10"><Settings size={18} /></button>
+
+                        {user?.uid === team.adminId ? (
+                            <button
+                                onClick={handleDisbandTeam}
+                                className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold hover:bg-rose-500/20 transition-all"
+                            >
+                                Disband Team
+                            </button>
+                        ) : team.currentMembers?.includes(user?.uid || "") ? (
+                            <button
+                                onClick={handleLeaveTeam}
+                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 text-xs font-bold hover:bg-white/10 transition-all"
+                            >
+                                Leave Team
+                            </button>
+                        ) : null}
+
+                        <button onClick={() => toast.info("Link Shared", { description: "Invitations sent to matched candidates." })} className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">Invite Members</button>
+                        <button onClick={() => toast("Settings Locked")} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/40"><Settings size={18} /></button>
                     </div>
                 </div>
             </nav>
@@ -105,29 +183,29 @@ export default function TeamDetail() {
                                     <h2 className="text-2xl font-black">Project Vision</h2>
                                     <div className="flex items-center space-x-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                                         <CheckCircle2Icon size={12} />
-                                        <span>Status: Active</span>
+                                        <span>Status: {team.status}</span>
                                     </div>
                                 </div>
                                 <p className="text-white/60 leading-relaxed font-light">
-                                    {team.description} We're focusing on a sub-specialized model that can handle medical imagery data with high precision while maintaining a compact size for edge deployment.
+                                    {team.description} {team.projectIdea}
                                 </p>
                                 <div className="flex flex-wrap gap-2 pt-4">
-                                    {team.techStack.map(tech => (
-                                        <span key={tech} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60">{tech}</span>
+                                    {(team.skillsNeeded || []).map((skill: string) => (
+                                        <span key={skill} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60">{skill}</span>
                                     ))}
                                 </div>
                             </div>
 
                             {/* Team Roster */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {team.members.map(member => (
-                                    <div key={member.name} className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center space-x-4">
+                                {(team.currentMembers || []).map((mId: string) => (
+                                    <div key={mId} className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center space-x-4">
                                         <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black">
-                                            {member.avatar}
+                                            {mId[0].toUpperCase()}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold">{member.name}</p>
-                                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{member.role}</p>
+                                            <p className="text-sm font-bold">User {mId.substring(0, 4)}</p>
+                                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Team Member</p>
                                         </div>
                                     </div>
                                 ))}
@@ -175,7 +253,7 @@ export default function TeamDetail() {
                                 <div className="space-y-3">
                                     <IntelRow icon={<Trophy size={14} />} label="Prize" value="$50,000" />
                                     <IntelRow icon={<Calendar size={14} />} label="Deadline" value="4d 12h" />
-                                    <IntelRow icon={<Users size={14} />} label="Open Slots" value="2 / 5" />
+                                    <IntelRow icon={<Users size={14} />} label="Open Slots" value={`${5 - (team.currentMembers?.length || 0)} / 5`} />
                                 </div>
                             </div>
                         </div>

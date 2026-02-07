@@ -21,24 +21,33 @@ import {
 import { MOCK_HACKATHONS, MOCK_TEAMS, MOCK_USER } from "@/lib/mock-data";
 import { cn, formatScore, getScoreColor } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Team } from "@/types/firebase";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { JoinRequestModal } from "@/components/JoinRequestModal";
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTeams } from "@/hooks/useFirestore";
 
 export default function Dashboard() {
     const router = useRouter();
+    const { user, profile, logout, loading: authLoading } = useAuth();
+    const { teams, loading: teamsLoading } = useTeams();
+
     const [requestModal, setRequestModal] = React.useState({
         isOpen: false,
+        teamId: "",
+        teamAdminId: "",
         teamName: "",
         roleNeeded: ""
     });
     const [searchQuery, setSearchQuery] = React.useState("");
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         toast.info("Logging out...");
-        setTimeout(() => router.push('/login'), 1000);
+        await logout();
+        router.push('/login');
     };
 
     const handleSearch = (e: React.KeyboardEvent) => {
@@ -53,22 +62,33 @@ export default function Dashboard() {
         toast.success("Welcome back!", { description: "Your dashboard is ready." });
     }, []);
 
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Establishing Neural Link...</p>
+                </div>
+            </div>
+        );
+    }
+
+    const phases = [
+        { label: "Ideation", color: "text-amber-400 bg-amber-400/5" },
+        { label: "Formation", color: "text-indigo-400 bg-indigo-400/5" },
+        { label: "Development", color: "text-emerald-400 bg-emerald-400/5" },
+        { label: "Pitching", color: "text-primary bg-primary/5" },
+    ];
+
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex selection:bg-primary/30 relative">
-            {/* Phase Voyager: Global Integrity Bridge */}
-            <div className="fixed bottom-10 right-10 z-[100] flex flex-col items-end space-y-4">
-                <div className="flex flex-col items-end space-y-2 opacity-0 hover:opacity-100 transition-all transform translate-y-4 hover:translate-y-0 group-hover:block hidden group-focus-within:block">
-                    {[
-                        { label: "Home", path: "/", color: "bg-white/10" },
-                        { label: "Login", path: "/login", color: "bg-white/10" },
-                        { label: "Onboarding", path: "/onboarding", color: "bg-primary/20 text-primary border-primary/30" },
-                        { label: "Events", path: "/events", color: "bg-white/10" },
-                        { label: "Teams", path: "/teams/reverse", color: "bg-white/10" },
-                        { label: "Startups", path: "/startup", color: "bg-amber-400/20 text-amber-400 border-amber-400/30" },
-                    ].map((phase, i) => (
+        <div className="min-h-screen bg-[#050505] text-white flex flex-col md:flex-row overflow-hidden italic-all">
+            {/* Global Context Overlay */}
+            <div className="fixed bottom-10 right-10 z-[60] flex items-center space-x-6">
+                <div className="hidden md:flex items-center space-x-3 bg-black/40 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                    {phases.map((phase) => (
                         <button
-                            key={i}
-                            onClick={() => router.push(phase.path)}
+                            key={phase.label}
+                            onClick={() => toast.info(`Phase: ${phase.label}`)}
                             className={cn(
                                 "px-4 py-2 rounded-xl border border-white/5 text-[9px] font-black uppercase tracking-widest backdrop-blur-xl transition-all hover:scale-110 active:scale-95",
                                 phase.color
@@ -90,6 +110,8 @@ export default function Dashboard() {
             <JoinRequestModal
                 isOpen={requestModal.isOpen}
                 onClose={() => setRequestModal(prev => ({ ...prev, isOpen: false }))}
+                teamId={requestModal.teamId}
+                teamAdminId={requestModal.teamAdminId}
                 teamName={requestModal.teamName}
                 roleNeeded={requestModal.roleNeeded}
             />
@@ -125,12 +147,12 @@ export default function Dashboard() {
                         className="group flex items-center space-x-3 px-3 py-4 rounded-2xl hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/5"
                     >
                         <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-black relative">
-                            {MOCK_USER.avatar}
+                            {profile?.name?.[0] || "?"}
                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black truncate text-white italic uppercase tracking-tight">{MOCK_USER.name}</p>
-                            <p className="text-[9px] text-white/30 truncate uppercase font-bold tracking-widest">{MOCK_USER.major}</p>
+                            <p className="text-xs font-black truncate text-white italic uppercase tracking-tight">{profile?.name || "Anonymous"}</p>
+                            <p className="text-[9px] text-white/30 truncate uppercase font-bold tracking-widest">{profile?.role || "Developer"}</p>
                         </div>
                         <LogOut size={14} className="text-white/20 group-hover:text-rose-400 transition-colors" />
                     </div>
@@ -205,23 +227,57 @@ export default function Dashboard() {
                             </div>
 
                             <div className="space-y-6">
-                                {MOCK_TEAMS.map((team, idx) => (
-                                    <TeamCard
-                                        key={team.id}
-                                        team={team}
-                                        index={idx}
-                                        onClick={() => router.push(`/teams/${team.id}`)}
-                                        onRespond={(e) => {
-                                            e.stopPropagation();
-                                            setRequestModal({
-                                                isOpen: true,
-                                                teamName: team.name,
-                                                roleNeeded: team.rolesNeeded[0] || "Strategic Member"
-                                            });
-                                        }}
-                                    />
-                                ))}
+                                {teamsLoading ? (
+                                    <div className="p-10 text-center text-white/20 font-black uppercase tracking-widest">
+                                        Initializing AI Matching Matrix...
+                                    </div>
+                                ) : (
+                                    teams.filter(t => !t.currentMembers?.includes(user?.uid || "")).map((team, idx) => (
+                                        <TeamCard
+                                            key={team.id}
+                                            team={team}
+                                            index={idx}
+                                            onClick={() => router.push(`/teams/${team.id}`)}
+                                            onRespond={(e) => {
+                                                e.stopPropagation();
+                                                setRequestModal({
+                                                    isOpen: true,
+                                                    teamId: team.id,
+                                                    teamAdminId: team.adminId,
+                                                    teamName: team.name,
+                                                    roleNeeded: team.rolesNeeded?.[0] || "Strategic Member"
+                                                });
+                                            }}
+                                        />
+                                    ))
+                                )}
                             </div>
+
+                            {/* Active Teams Section */}
+                            {!teamsLoading && teams.some(t => t.currentMembers?.includes(user?.uid || "")) && (
+                                <div className="pt-12 space-y-8">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
+                                            <ShieldCheck size={24} className="text-emerald-400" />
+                                            <span>Active Teams</span>
+                                        </h2>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {teams.filter(t => t.currentMembers?.includes(user?.uid || "")).map((team, idx) => (
+                                            <TeamCard
+                                                key={team.id}
+                                                team={team}
+                                                index={idx}
+                                                onClick={() => router.push(`/teams/${team.id}`)}
+                                                onRespond={(e) => {
+                                                    e.stopPropagation();
+                                                    toast.success("Team Portal Active", { description: "You are already a verified member of this squad." });
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Mentorship Alignment Section */}
                             <div className="pt-12 space-y-8">
@@ -270,7 +326,7 @@ export default function Dashboard() {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 group-hover:bg-primary/10 transition-colors" />
                                 <h2 className="text-xs font-black italic uppercase tracking-[0.2em] text-white/90 mb-6">Skills</h2>
                                 <div className="flex flex-wrap gap-2">
-                                    {MOCK_USER.skills.map(skill => (
+                                    {(profile?.skills || []).map(skill => (
                                         <span key={skill} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/50 uppercase tracking-widest hover:border-primary/30 hover:text-primary transition-all cursor-default">
                                             {skill}
                                         </span>
@@ -337,7 +393,7 @@ function StatCard({ label, value, change, icon }: { label: string, value: string
     );
 }
 
-function TeamCard({ team, index, onClick, onRespond }: { team: any, index: number, onClick: () => void, onRespond: (e: any) => void }) {
+function TeamCard({ team, index, onClick, onRespond }: { team: Team & { matchScore?: number, matchReasons?: string[] }, index: number, onClick: () => void, onRespond: (e: any) => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -355,9 +411,9 @@ function TeamCard({ team, index, onClick, onRespond }: { team: any, index: numbe
                 </div>
                 <div className={cn(
                     "px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 text-[12px] font-black uppercase tracking-widest",
-                    getScoreColor(team.matchScore)
+                    getScoreColor(team.matchScore || 0.8)
                 )}>
-                    {formatScore(team.matchScore)}
+                    {formatScore(team.matchScore || 0.8)}
                 </div>
             </div>
 
@@ -376,29 +432,36 @@ function TeamCard({ team, index, onClick, onRespond }: { team: any, index: numbe
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
-                    {team.rolesNeeded.map((role: string) => (
+                    {(team.rolesNeeded || []).map((role: string) => (
                         <span key={role} className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-rose-400/5 border border-rose-400/10 text-[9px] font-black text-rose-400 uppercase tracking-widest">
                             <UsersIcon size={12} />
                             <span>{role}</span>
                         </span>
                     ))}
-                    {team.techStack.map((tech: string) => (
-                        <span key={tech} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/30 uppercase tracking-widest group-hover:text-white/60 transition-colors">{tech}</span>
+                    {(team.skillsNeeded || []).map((skill: string) => (
+                        <span key={skill} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black text-white/30 uppercase tracking-widest group-hover:text-white/60 transition-colors">{skill}</span>
                     ))}
                 </div>
 
                 <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center space-x-4">
                         <div className="flex -space-x-2.5">
-                            {team.members.map((m: any, idx: number) => (
-                                <div key={idx} className="w-8 h-8 rounded-xl bg-white/10 border-2 border-black flex items-center justify-center text-[10px] font-black ring-2 ring-primary/0 group-hover:ring-primary/20 transition-all">{m.avatar}</div>
+                            {(team.currentMembers || []).slice(0, 3).map((m: string, idx: number) => (
+                                <div key={idx} className="w-8 h-8 rounded-xl bg-white/10 border-2 border-black flex items-center justify-center text-[10px] font-black ring-2 ring-primary/0 group-hover:ring-primary/20 transition-all">
+                                    {m.substring(0, 1).toUpperCase()}
+                                </div>
                             ))}
+                            {team.currentMembers?.length > 3 && (
+                                <div className="w-8 h-8 rounded-xl bg-white/10 border-2 border-black flex items-center justify-center text-[10px] font-black">
+                                    +{team.currentMembers.length - 3}
+                                </div>
+                            )}
                         </div>
                         <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Team Members</span>
                     </div>
                     <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest italic flex items-center">
                         <Sparkles size={12} className="mr-2" />
-                        Match: <span className="ml-2 text-white">{team.matchReasons[0]}</span>
+                        Match: <span className="ml-2 text-white">{team.matchReasons?.[0] || team.projectIdea}</span>
                     </p>
                 </div>
             </div>
