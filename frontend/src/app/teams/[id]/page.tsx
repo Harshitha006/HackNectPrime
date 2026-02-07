@@ -25,7 +25,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/services/firebase";
 import { Team } from "@/types/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { firestoreService } from "@/hooks/useFirestore";
+import { firestoreService, useChatMessages } from "@/hooks/useFirestore";
 
 const SKILLS_ANALYSIS = [
     { skill: "Python / ML", coverage: 0.9, ideal: 0.8 },
@@ -38,40 +38,36 @@ const SKILLS_ANALYSIS = [
 export default function TeamDetail() {
     const { id } = useParams();
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [activeTab, setActiveTab] = useState('hub');
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
+    const { messages, loading: messagesLoading } = useChatMessages(id as string);
 
     const handleLeaveTeam = async () => {
         if (!user || !team) return;
         try {
             await firestoreService.leaveTeam(team.id, user.uid);
-            toast.success("Squad Vacated", { description: "You have disconnected from the team's neural network." });
+            toast.success("Left Team", { description: "You have left the team." });
             router.push('/dashboard');
         } catch (error) {
-            toast.error("Decoupling failed. System override required.");
+            toast.error("Failed to leave team. Please try again.");
         }
     };
 
     const handleDisbandTeam = async () => {
         if (!team) return;
-        if (!confirm("CRITICAL: This will incinerate all team data. Proceed?")) return;
+        if (!confirm("Are you sure you want to disband this team? This action cannot be undone.")) return;
 
         try {
             await firestoreService.disbandTeam(team.id);
-            toast.success("Team Disbanded", { description: "The project has been archived." });
+            toast.success("Team Disbanded", { description: "The team has been deleted." });
             router.push('/dashboard');
         } catch (error) {
-            toast.error("Archival failed. Core remains active.");
+            toast.error("Failed to disband team.");
         }
     };
 
-    const [messages, setMessages] = useState([
-        { user: "John Doe", text: "Just committed the initial model architecture", time: "12:04" },
-        { user: "Sarah Smith", text: "Frontend components for data viz are ready", time: "12:15" },
-        { user: "John Doe", text: "Great, let's look at the API integration next", time: "12:16" },
-    ]);
     const [newMessage, setNewMessage] = useState("");
     const [hasAlert, setHasAlert] = useState(false);
 
@@ -88,38 +84,47 @@ export default function TeamDetail() {
         return () => unsubscribe();
     }, [id]);
 
-    const handleSendMessage = () => {
-        if (!newMessage.trim()) return;
-        const msg = { user: "You", text: newMessage, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-        setMessages([...messages, msg]);
+    const handleSendMessage = async () => {
+        if (!newMessage.trim() || !user || !id) return;
 
-        if (newMessage.toLowerCase().includes("not working") || newMessage.toLowerCase().includes("error")) {
-            setHasAlert(true);
-            toast.error("Mentor Notified", { description: "Frustration detected. Analysis complete." });
+        try {
+            await firestoreService.sendMessage({
+                teamId: id as string,
+                senderId: user.uid,
+                text: newMessage,
+                senderName: profile?.name || "Member"
+            });
+
+            if (newMessage.toLowerCase().includes("not working") || newMessage.toLowerCase().includes("error")) {
+                setHasAlert(true);
+                toast.error("Mentor Notified", { description: "A mentor has been alerted to your issue." });
+            }
+
+            setNewMessage("");
+        } catch (error) {
+            toast.error("Failed to send message.");
         }
-
-        setNewMessage("");
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center font-black uppercase tracking-widest animate-pulse">
-                Synchronizing with Team Node...
+            <div className="min-h-screen bg-[#08080a] text-white flex items-center justify-center font-medium text-sm animate-pulse">
+                Loading Team...
             </div>
         );
     }
 
     if (!team) {
         return (
-            <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center space-y-4">
-                <h2 className="text-2xl font-black uppercase">Team Not Found</h2>
-                <button onClick={() => router.push('/dashboard')} className="px-6 py-2 bg-primary rounded-xl font-bold">Return to Dashboard</button>
+            <div className="min-h-screen bg-[#08080a] text-white flex flex-col items-center justify-center space-y-4">
+                <h2 className="text-xl font-bold">Team Not Found</h2>
+                <button onClick={() => router.push('/dashboard')} className="px-6 py-2 bg-primary rounded-lg font-medium text-sm">Return to Dashboard</button>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex flex-col">
+        <div className="min-h-screen bg-[#08080a] text-white flex flex-col">
             {/* Header */}
             <nav className="glass border-b border-white/5 sticky top-0 z-50">
                 <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -130,7 +135,7 @@ export default function TeamDetail() {
                         <div className="h-8 w-[1px] bg-white/10 mx-2" />
                         <div>
                             <h1 className="text-lg font-bold tracking-tight">{team.name}</h1>
-                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] leading-none mt-1">Global AI Hackathon 2025</p>
+                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-wide leading-none mt-1">Global AI Hackathon 2025</p>
                         </div>
                     </div>
 
@@ -180,7 +185,7 @@ export default function TeamDetail() {
                             {/* Project Vision */}
                             <div className="p-8 rounded-[2.5rem] glass-card space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-2xl font-black">Project Vision</h2>
+                                    <h2 className="text-xl font-bold tracking-tight">Project Vision</h2>
                                     <div className="flex items-center space-x-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                                         <CheckCircle2Icon size={12} />
                                         <span>Status: {team.status}</span>
@@ -191,10 +196,33 @@ export default function TeamDetail() {
                                 </p>
                                 <div className="flex flex-wrap gap-2 pt-4">
                                     {(team.skillsNeeded || []).map((skill: string) => (
-                                        <span key={skill} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60">{skill}</span>
+                                        <span key={skill} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-medium text-white/60">{skill}</span>
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Active Mentors */}
+                            {(team.activeMentors || []).length > 0 && (
+                                <div className="space-y-4">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 border-l-2 border-indigo-400 pl-3">Active Mentors</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {team.activeMentors?.map((mentorId: string) => (
+                                            <div key={mentorId} className="p-4 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 flex items-center space-x-4 group hover:bg-indigo-500/10 transition-all">
+                                                <div className="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center font-black shadow-lg shadow-indigo-500/20">
+                                                    M
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white group-hover:text-indigo-400">Expert Mentor</p>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-wide leading-none">Online</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Team Roster */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,9 +237,9 @@ export default function TeamDetail() {
                                         </div>
                                     </div>
                                 ))}
-                                <div onClick={() => toast.info("Recruitment Active", { description: "Opening slot for next team member." })} className="p-4 rounded-3xl border-2 border-dashed border-white/5 flex items-center justify-center space-x-2 text-white/20 hover:text-white/40 cursor-pointer hover:border-white/10 transition-all group">
+                                <div onClick={() => toast.info("Recruitment Active", { description: "Opening slot for next team member." })} className="p-4 rounded-3xl border-2 border-dashed border-white/5 flex items-center justify-center space-x-2 text-white/30 hover:text-white/50 cursor-pointer hover:border-white/10 transition-all group">
                                     <Plus size={16} />
-                                    <span className="text-xs font-bold uppercase tracking-widest">New Role</span>
+                                    <span className="text-xs font-bold uppercase tracking-wide">New Role</span>
                                 </div>
                             </div>
 
@@ -219,8 +247,13 @@ export default function TeamDetail() {
                             <div className="p-6 rounded-[2.5rem] glass-card flex flex-col h-80">
                                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-4">Team Chat</h3>
                                 <div className="flex-1 space-y-4 overflow-y-auto pr-2 scrollbar-hide">
-                                    {messages.map((m, i) => (
-                                        <ChatMessage key={i} user={m.user} text={m.text} time={m.time} />
+                                    {messages.map((m) => (
+                                        <ChatMessage
+                                            key={m.id}
+                                            user={m.senderName || "Member"}
+                                            text={m.text}
+                                            time={m.timestamp ? (m.timestamp as any).toDate?.().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "..."}
+                                        />
                                     ))}
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-white/5 flex items-center space-x-2">
@@ -245,7 +278,7 @@ export default function TeamDetail() {
                             </div>
 
                             {/* Mentor Radar */}
-                            <MentorRadar forcedAlert={hasAlert} />
+                            <MentorRadar teamId={team.id} forcedAlert={hasAlert} />
 
                             {/* Important Details */}
                             <div className="p-6 rounded-[2rem] glass-card space-y-4">
@@ -284,10 +317,10 @@ function ChatMessage({ user, text, time }: { user: string, text: string, time: s
     return (
         <div className="flex flex-col space-y-1">
             <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase text-primary tracking-widest">{user}</span>
-                <span className="text-[8px] font-bold text-white/20">{time}</span>
+                <span className="text-[10px] font-bold uppercase text-primary tracking-wide">{user}</span>
+                <span className="text-[10px] font-medium text-white/30">{time}</span>
             </div>
-            <p className="text-xs text-white/70 leading-relaxed font-light">{text}</p>
+            <p className="text-sm text-white/80 leading-relaxed font-light">{text}</p>
         </div>
     );
 }
@@ -295,11 +328,11 @@ function ChatMessage({ user, text, time }: { user: string, text: string, time: s
 function IntelRow({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
     return (
         <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-white/30">
+            <div className="flex items-center space-x-2 text-white/40">
                 {icon}
-                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide">{label}</span>
             </div>
-            <span className="text-xs font-black text-white">{value}</span>
+            <span className="text-xs font-bold text-white">{value}</span>
         </div>
     );
 }

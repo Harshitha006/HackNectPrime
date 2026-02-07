@@ -31,9 +31,22 @@ export interface Team {
     rolesNeeded: string[];
     skillsNeeded: string[];
     mentorNeeded: boolean;
+    activeMentors?: string[]; // user uids
     status: TeamStatus;
     communicationLink?: string;
     adminId: string; // the creator of the team
+    createdAt: Timestamp | Date;
+    updatedAt: Timestamp | Date;
+}
+
+export interface MentorshipRequest {
+    id: string;
+    mentorId: string;
+    teamId: string;
+    teamAdminId: string;
+    message: string;
+    status: RequestStatus;
+    timestamp: Timestamp | Date;
     createdAt: Timestamp | Date;
     updatedAt: Timestamp | Date;
 }
@@ -83,6 +96,8 @@ export interface Match {
 export interface ChatMessage {
     id: string;
     senderId: string;
+    senderName?: string;
+    teamId: string;
     text: string;
     timestamp: Timestamp | Date;
 }

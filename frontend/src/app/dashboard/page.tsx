@@ -16,7 +16,8 @@ import {
     ExternalLink,
     ChevronRight,
     Sparkles,
-    ShieldCheck
+    ShieldCheck,
+    GraduationCap
 } from "lucide-react";
 import { MOCK_HACKATHONS, MOCK_TEAMS, MOCK_USER } from "@/lib/mock-data";
 import { cn, formatScore, getScoreColor } from "@/lib/utils";
@@ -64,10 +65,10 @@ export default function Dashboard() {
 
     if (authLoading) {
         return (
-            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+            <div className="min-h-screen bg-[#08080a] flex items-center justify-center">
                 <div className="flex flex-col items-center space-y-4">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Establishing Neural Link...</p>
+                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs font-medium text-white/50">Loading...</p>
                 </div>
             </div>
         );
@@ -81,7 +82,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex flex-col md:flex-row overflow-hidden italic-all">
+        <div className="min-h-screen bg-[#08080a] text-white flex flex-col md:flex-row overflow-hidden">
             {/* Global Context Overlay */}
             <div className="fixed bottom-10 right-10 z-[60] flex items-center space-x-6">
                 <div className="hidden md:flex items-center space-x-3 bg-black/40 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/5 shadow-2xl">
@@ -90,7 +91,7 @@ export default function Dashboard() {
                             key={phase.label}
                             onClick={() => toast.info(`Phase: ${phase.label}`)}
                             className={cn(
-                                "px-4 py-2 rounded-xl border border-white/5 text-[9px] font-black uppercase tracking-widest backdrop-blur-xl transition-all hover:scale-110 active:scale-95",
+                                "px-3 py-1.5 rounded-lg border border-white/5 text-[10px] font-bold uppercase tracking-wide backdrop-blur-md transition-all hover:scale-105",
                                 phase.color
                             )}
                         >
@@ -99,8 +100,8 @@ export default function Dashboard() {
                     ))}
                 </div>
                 <button
-                    className="w-16 h-16 rounded-[2rem] bg-primary shadow-[0_0_30px_rgba(139,92,246,0.5)] flex items-center justify-center group relative overflow-hidden transition-all hover:rotate-90 active:scale-90"
-                    onClick={() => toast.info("Bridge Active", { description: "Global phase navigation enabled via hovering." })}
+                    className="w-16 h-16 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center group relative overflow-hidden transition-all hover:scale-110"
+                    onClick={() => toast.info("Global Navigation Active")}
                 >
                     <LayoutDashboard size={24} className="text-white group-hover:scale-110 transition-transform" />
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
@@ -118,10 +119,10 @@ export default function Dashboard() {
             {/* Sidebar */}
             <aside className="w-64 border-r border-white/5 bg-black/40 backdrop-blur-3xl hidden lg:flex flex-col">
                 <div className="p-8 flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                        <TrendingUp size={20} className="text-white" />
+                    <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                        <TrendingUp size={18} className="text-white" />
                     </div>
-                    <span className="text-2xl font-black tracking-tighter uppercase italic">
+                    <span className="text-xl font-bold tracking-tight">
                         Hack<span className="text-primary">Nect</span>
                     </span>
                 </div>
@@ -131,7 +132,14 @@ export default function Dashboard() {
                     <SidebarItem icon={<Calendar size={18} />} label="Events" onClick={() => router.push('/events')} />
                     <SidebarItem icon={<UsersIcon size={18} />} label="Find Teams" onClick={() => router.push('/teams/reverse')} />
                     <SidebarItem icon={<Trophy size={18} />} label="Hall of Fame" onClick={() => router.push('/hall-of-fame')} />
-                    <div className="pt-10 px-4">
+                    <div className="pt-10 px-4 space-y-2">
+                        {profile?.role === 'mentor' && (
+                            <SidebarItem
+                                icon={<GraduationCap size={18} className="text-indigo-400" />}
+                                label="Mentor Portal"
+                                onClick={() => router.push('/mentor')}
+                            />
+                        )}
                         <SidebarItem
                             icon={<Sparkles size={18} className="text-amber-400" />}
                             label="Startup Portal"
@@ -151,8 +159,8 @@ export default function Dashboard() {
                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black truncate text-white italic uppercase tracking-tight">{profile?.name || "Anonymous"}</p>
-                            <p className="text-[9px] text-white/30 truncate uppercase font-bold tracking-widest">{profile?.role || "Developer"}</p>
+                            <p className="text-sm font-bold text-white truncate">{profile?.name || "Anonymous"}</p>
+                            <p className="text-[10px] text-white/40 truncate font-medium uppercase tracking-wide">{profile?.role || "Developer"}</p>
                         </div>
                         <LogOut size={14} className="text-white/20 group-hover:text-rose-400 transition-colors" />
                     </div>
@@ -169,10 +177,10 @@ export default function Dashboard() {
                                 <TrendingUp size={20} className="text-primary" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-xl font-black italic uppercase tracking-tighter leading-none">Dashboard</h1>
-                                <div className="flex items-center space-x-2 mt-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500/80">Active</span>
+                                <h1 className="text-lg font-bold tracking-tight">Dashboard</h1>
+                                <div className="flex items-center space-x-2 mt-0.5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span className="text-[10px] font-semibold text-emerald-500/80">Active</span>
                                 </div>
                             </div>
                         </div>
@@ -185,14 +193,14 @@ export default function Dashboard() {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={handleSearch}
                                     placeholder="Search events..."
-                                    className="bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-[10px] font-black tracking-widest w-72 focus:border-primary/50 focus:bg-white/[0.07] outline-none transition-all"
+                                    className="bg-white/5 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-xs font-medium w-64 focus:border-primary/50 focus:bg-white/[0.07] outline-none transition-all placeholder:text-white/20"
                                 />
                             </div>
                             <div className="flex items-center space-x-3">
                                 <NotificationCenter />
                                 <button
-                                    onClick={() => toast.info("System Configuration", { description: "Encryption layer v4.3 active." })}
-                                    className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 group transition-all"
+                                    onClick={() => toast.info("Settings")}
+                                    className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 group transition-all"
                                 >
                                     <Settings size={18} className="text-white/40 group-hover:text-white" />
                                 </button>
@@ -214,8 +222,8 @@ export default function Dashboard() {
                         {/* Left Column: Recommendations */}
                         <div className="xl:col-span-2 space-y-8">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
-                                    <Sparkles size={24} className="text-primary" />
+                                <h2 className="text-xl font-bold tracking-tight flex items-center space-x-3">
+                                    <Sparkles size={20} className="text-primary" />
                                     <span className="text-gradient">Recommended Teams</span>
                                 </h2>
                                 <button
@@ -228,11 +236,11 @@ export default function Dashboard() {
 
                             <div className="space-y-6">
                                 {teamsLoading ? (
-                                    <div className="p-10 text-center text-white/20 font-black uppercase tracking-widest">
-                                        Initializing AI Matching Matrix...
+                                    <div className="p-10 text-center text-white/40 font-medium text-sm">
+                                        Loading recommendations...
                                     </div>
                                 ) : (
-                                    teams.filter(t => !t.currentMembers?.includes(user?.uid || "")).map((team, idx) => (
+                                    teams.filter(t => !t.currentMembers?.includes(user?.uid || "") && !t.activeMentors?.includes(user?.uid || "")).map((team, idx) => (
                                         <TeamCard
                                             key={team.id}
                                             team={team}
@@ -254,16 +262,16 @@ export default function Dashboard() {
                             </div>
 
                             {/* Active Teams Section */}
-                            {!teamsLoading && teams.some(t => t.currentMembers?.includes(user?.uid || "")) && (
+                            {!teamsLoading && teams.some(t => t.currentMembers?.includes(user?.uid || "") || t.activeMentors?.includes(user?.uid || "")) && (
                                 <div className="pt-12 space-y-8">
                                     <div className="flex items-center justify-between">
-                                        <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
-                                            <ShieldCheck size={24} className="text-emerald-400" />
+                                        <h2 className="text-xl font-bold tracking-tight flex items-center space-x-3">
+                                            <ShieldCheck size={20} className="text-emerald-400" />
                                             <span>Active Teams</span>
                                         </h2>
                                     </div>
                                     <div className="space-y-6">
-                                        {teams.filter(t => t.currentMembers?.includes(user?.uid || "")).map((team, idx) => (
+                                        {teams.filter(t => t.currentMembers?.includes(user?.uid || "") || t.activeMentors?.includes(user?.uid || "")).map((team, idx) => (
                                             <TeamCard
                                                 key={team.id}
                                                 team={team}
@@ -271,7 +279,7 @@ export default function Dashboard() {
                                                 onClick={() => router.push(`/teams/${team.id}`)}
                                                 onRespond={(e) => {
                                                     e.stopPropagation();
-                                                    toast.success("Team Portal Active", { description: "You are already a verified member of this squad." });
+                                                    toast.success("Team Portal Active", { description: "You are already a verified member or mentor of this squad." });
                                                 }}
                                             />
                                         ))}
@@ -282,9 +290,9 @@ export default function Dashboard() {
                             {/* Mentorship Alignment Section */}
                             <div className="pt-12 space-y-8">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center space-x-3">
-                                        <UsersIcon size={24} className="text-indigo-400" />
-                                        <span>Mentor Alignment</span>
+                                    <h2 className="text-xl font-bold tracking-tight flex items-center space-x-3">
+                                        <UsersIcon size={20} className="text-indigo-400" />
+                                        <span>Mentor Matching</span>
                                     </h2>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -358,7 +366,7 @@ function SidebarItem({ icon, label, active = false, isPremium = false, onClick }
             )}>
             <div className="flex items-center space-x-3 relative z-10">
                 <span className={cn("transition-colors", active ? "text-white" : "group-hover:text-primary")}>{icon}</span>
-                <span className="text-[11px] font-black uppercase tracking-widest">{label}</span>
+                <span className="text-xs font-bold">{label}</span>
             </div>
             {isPremium && (
                 <div className="px-2 py-0.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-[8px] font-black text-amber-400 uppercase tracking-tighter">PRIME</div>
@@ -387,8 +395,8 @@ function StatCard({ label, value, change, icon }: { label: string, value: string
                     </span>
                 )}
             </div>
-            <p className="text-3xl font-black mb-1 italic tracking-tighter">{value}</p>
-            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">{label}</p>
+            <p className="text-2xl font-bold mb-1 tracking-tight">{value}</p>
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-wide">{label}</p>
         </div>
     );
 }
@@ -406,11 +414,11 @@ function TeamCard({ team, index, onClick, onRespond }: { team: Team & { matchSco
             <div className="absolute top-0 right-0 w-1 bg-primary/20 h-full rounded-full group-hover:bg-primary transition-colors" />
 
             <div className="flex flex-col items-center space-y-4 shrink-0">
-                <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-primary via-indigo-600 to-purple-600 flex items-center justify-center text-3xl font-black text-white shadow-2xl shadow-primary/30 rotate-3 transition-transform group-hover:rotate-0">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-indigo-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-primary/20 group-hover:scale-105 transition-transform">
                     {team.name[0]}
                 </div>
                 <div className={cn(
-                    "px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 text-[12px] font-black uppercase tracking-widest",
+                    "px-2.5 py-1 rounded-lg bg-black/40 border border-white/5 text-[10px] font-bold uppercase tracking-wide",
                     getScoreColor(team.matchScore || 0.8)
                 )}>
                     {formatScore(team.matchScore || 0.8)}
@@ -420,12 +428,12 @@ function TeamCard({ team, index, onClick, onRespond }: { team: Team & { matchSco
             <div className="flex-1 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">{team.name}</h3>
-                        <p className="text-xs text-white/40 font-medium leading-relaxed max-w-lg">{team.description}</p>
+                        <h3 className="text-lg font-bold tracking-tight mb-2">{team.name}</h3>
+                        <p className="text-xs text-white/50 font-medium leading-relaxed max-w-lg">{team.description}</p>
                     </div>
                     <button
                         onClick={onRespond}
-                        className="px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-primary/20 active:scale-95"
+                        className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-xs transition-all shadow-lg shadow-primary/20"
                     >
                         Join Team
                     </button>
@@ -459,7 +467,7 @@ function TeamCard({ team, index, onClick, onRespond }: { team: Team & { matchSco
                         </div>
                         <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Team Members</span>
                     </div>
-                    <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest italic flex items-center">
+                    <p className="text-[10px] font-bold text-primary/60 uppercase tracking-widest flex items-center">
                         <Sparkles size={12} className="mr-2" />
                         Match: <span className="ml-2 text-white">{team.matchReasons?.[0] || team.projectIdea}</span>
                     </p>
@@ -481,13 +489,13 @@ function EventMiniCard({ event, onClick }: { event: any, onClick: () => void }) 
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
-                        <span className="text-[8px] font-black text-primary uppercase tracking-[.3em] bg-primary/10 px-2 py-0.5 rounded-full">{event.type}</span>
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-wide bg-primary/10 px-2 py-0.5 rounded-full">{event.type}</span>
                         <div className="w-1 h-1 rounded-full bg-white/20" />
-                        <span className="text-[8px] font-black text-white/30 uppercase tracking-widest italic">{event.date}</span>
+                        <span className="text-[10px] font-medium text-white/40 uppercase tracking-wide">{event.date}</span>
                     </div>
-                    <h4 className="text-sm font-black truncate text-white uppercase tracking-tight">{event.name}</h4>
+                    <h4 className="text-sm font-bold truncate text-white uppercase tracking-tight">{event.name}</h4>
                     <div className="flex items-center space-x-4 mt-2">
-                        <div className="flex items-center space-x-1.5 text-[9px] text-white/30 font-black uppercase tracking-widest">
+                        <div className="flex items-center space-x-1.5 text-[10px] text-white/40 font-medium uppercase tracking-wide">
                             <MapPin size={10} className="text-primary/50" />
                             <span>{event.location}</span>
                         </div>
@@ -505,18 +513,18 @@ function EventMiniCard({ event, onClick }: { event: any, onClick: () => void }) 
 function MentorMatchCard({ name, expertise, compatibility, avatar, onClick }: { name: string, expertise: string, compatibility: string, avatar: string, onClick: () => void }) {
     return (
         <div className="p-6 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 flex items-center space-x-6 group hover:bg-indigo-500/10 transition-all cursor-default relative overflow-hidden">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-xl font-black text-indigo-400">
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-lg font-bold text-indigo-400">
                 {avatar}
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-black uppercase tracking-tight">{name}</h4>
-                    <span className="text-[10px] font-black text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full">{compatibility} Match</span>
+                    <h4 className="text-sm font-bold uppercase tracking-tight">{name}</h4>
+                    <span className="text-[10px] font-bold text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full">{compatibility} Match</span>
                 </div>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate">{expertise}</p>
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wide truncate">{expertise}</p>
                 <button
                     onClick={onClick}
-                    className="mt-3 text-[9px] font-black text-indigo-400 uppercase tracking-widest hover:text-white transition-colors"
+                    className="mt-3 text-[10px] font-bold text-indigo-400 uppercase tracking-wide hover:text-white transition-colors"
                 >
                     Contact Mentor ➔
                 </button>

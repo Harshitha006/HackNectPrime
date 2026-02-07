@@ -20,8 +20,8 @@ import { IdeaProposalModal } from "@/components/IdeaProposalModal";
 const MOCK_IDEAS = [
     {
         id: "i1",
-        title: "Autonomous Hive Mind",
-        description: "A decentralized swarm intelligence for coordinating urban logistics drones using ultra-low latency mesh networks.",
+        title: "Smart Logistics Network",
+        description: "A decentralized system for coordinating urban logistics drones using efficient mesh networks.",
         author: "NeoMatrix",
         needed: ["Blockchain", "IoT", "C++"],
         applicants: 12,
@@ -29,8 +29,8 @@ const MOCK_IDEAS = [
     },
     {
         id: "i2",
-        title: "Neural Audio Synthesis",
-        description: "Generating fully immersive 3D acoustic environments from textual prompts using latent diffusion models.",
+        title: "Immersive Audio Gen",
+        description: "Generating immersive 3D acoustic environments from text prompts using diffusion models.",
         author: "SonicBoom",
         needed: ["Python", "PyTorch", "DSP"],
         applicants: 8,
@@ -43,7 +43,7 @@ export default function ReverseHackathon() {
     const [isProposalOpen, setIsProposalOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-primary/30">
+        <div className="min-h-screen bg-[#08080a] text-white selection:bg-primary/30">
             <IdeaProposalModal
                 isOpen={isProposalOpen}
                 onClose={() => setIsProposalOpen(false)}
@@ -59,35 +59,31 @@ export default function ReverseHackathon() {
                         >
                             <ChevronLeft size={20} />
                         </button>
-                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Project <span className="text-primary">First</span></h1>
+                        <h1 className="text-xl font-bold tracking-tight uppercase">Project <span className="text-primary">First</span></h1>
                     </div>
                 </div>
             </nav>
 
             <main className="container mx-auto px-6 py-16 space-y-16 max-w-6xl">
                 {/* Hero Section */}
-                <div className="text-center space-y-6">
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2"
-                    >
+                <div className="text-center space-y-4">
+                    <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary mb-2">
                         <Sparkles size={12} />
                         <span>Project Ideas</span>
-                    </motion.div>
+                    </div>
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none"
+                        className="text-4xl md:text-5xl font-bold tracking-tight"
                     >
-                        Assemble Around <span className="text-gradient">Innovation</span>
+                        Assemble Around <span className="text-primary">Innovation</span>
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-white/40 font-medium max-w-2xl mx-auto leading-relaxed"
+                        className="text-white/60 font-medium max-w-2xl mx-auto leading-relaxed text-sm"
                     >
                         Don't have a team? Start with a concept. The community will help make it a reality.
                     </motion.p>
@@ -99,17 +95,17 @@ export default function ReverseHackathon() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setIsProposalOpen(true)}
-                        className="p-10 rounded-[3rem] bg-primary group hover:bg-primary/90 transition-all cursor-pointer relative overflow-hidden shadow-2xl shadow-primary/30"
+                        className="p-8 rounded-[2rem] bg-primary group hover:bg-primary/90 transition-all cursor-pointer relative overflow-hidden shadow-xl shadow-primary/20"
                     >
                         <div className="absolute -bottom-10 -right-10 text-white/10 group-hover:scale-110 transition-transform">
                             <Lightbulb size={200} />
                         </div>
                         <div className="relative z-10 space-y-4 text-left">
-                            <h3 className="text-3xl font-black uppercase italic tracking-tighter">Post an Idea</h3>
+                            <h3 className="text-2xl font-bold">Post an Idea</h3>
                             <p className="text-white/80 font-medium text-sm leading-relaxed">Define your project goals, set requirements, and find teammates.</p>
-                            <div className="flex items-center space-x-3 text-xs font-black uppercase tracking-widest pt-4 group-hover:translate-x-2 transition-transform">
+                            <div className="flex items-center space-x-2 text-xs font-bold pt-4 group-hover:translate-x-2 transition-transform">
                                 <span>Create Proposal</span>
-                                <ArrowRight size={16} />
+                                <ArrowRight size={14} />
                             </div>
                         </div>
                     </motion.div>
@@ -120,19 +116,19 @@ export default function ReverseHackathon() {
                         onClick={() => {
                             const element = document.getElementById('project-feed');
                             element?.scrollIntoView({ behavior: 'smooth' });
-                            toast.info("Loading inventory...");
+                            toast.info("Loading ideas...");
                         }}
-                        className="p-10 rounded-[3rem] glass border border-white/5 group hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden shadow-2xl"
+                        className="p-8 rounded-[2rem] glass border border-white/5 group hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden shadow-xl"
                     >
                         <div className="absolute -bottom-10 -right-10 text-white/5 group-hover:text-primary/5 transition-colors">
                             <Users size={200} />
                         </div>
                         <div className="relative z-10 space-y-4 text-left">
-                            <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Join a Concept</h3>
-                            <p className="text-white/40 font-medium text-sm leading-relaxed">Browse high-potential project ideas and apply to be a foundational member.</p>
-                            <div className="flex items-center space-x-3 text-xs font-black uppercase tracking-widest pt-4 text-primary group-hover:translate-x-2 transition-transform">
+                            <h3 className="text-2xl font-bold text-white">Join a Concept</h3>
+                            <p className="text-white/50 font-medium text-sm leading-relaxed">Browse high-potential project ideas and apply to be a foundational member.</p>
+                            <div className="flex items-center space-x-2 text-xs font-bold pt-4 text-primary group-hover:translate-x-2 transition-transform">
                                 <span>Browse Ideas</span>
-                                <ArrowRight size={16} />
+                                <ArrowRight size={14} />
                             </div>
                         </div>
                     </motion.div>
@@ -141,8 +137,8 @@ export default function ReverseHackathon() {
                 {/* Active Projects Feed */}
                 <div id="project-feed" className="space-y-10 pt-10">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-black uppercase italic tracking-tight flex items-center space-x-3">
-                            <Zap size={24} className="text-primary" />
+                        <h3 className="text-lg font-bold flex items-center space-x-2">
+                            <Zap size={20} className="text-primary" />
                             <span>Live Ideas</span>
                         </h3>
                     </div>
@@ -186,21 +182,21 @@ function IdeaCard({ idea, index }: { idea: Idea, index: number }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="p-10 rounded-[3rem] glass-card border border-white/5 group relative overflow-hidden hover:border-primary/20 transition-all"
+            className="p-6 rounded-[2rem] glass-card border border-white/5 group relative overflow-hidden hover:border-primary/20 transition-all"
         >
-            <div className="flex flex-col lg:flex-row lg:items-center gap-10 text-left">
-                <div className="flex-1 space-y-6">
-                    <div className="flex items-center space-x-3 text-primary text-[10px] font-black uppercase tracking-[0.3em]">
-                        <Globe size={14} />
+            <div className="flex flex-col lg:flex-row lg:items-center gap-8 text-left">
+                <div className="flex-1 space-y-4">
+                    <div className="flex items-center space-x-2 text-primary text-xs font-medium">
+                        <Globe size={12} />
                         <span>Proposed by {idea.author}</span>
                     </div>
                     <div>
-                        <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4">{idea.title}</h3>
-                        <p className="text-white/40 font-medium leading-relaxed max-w-3xl">{idea.description}</p>
+                        <h3 className="text-2xl font-bold tracking-tight mb-2">{idea.title}</h3>
+                        <p className="text-white/50 font-medium leading-relaxed max-w-3xl text-sm">{idea.description}</p>
                     </div>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2">
                         {idea.needed.map((skill: string) => (
-                            <span key={skill} className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center space-x-2 group-hover:text-primary transition-colors">
+                            <span key={skill} className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-white/60 flex items-center space-x-2">
                                 <Code size={12} />
                                 <span>{skill}</span>
                             </span>
@@ -208,19 +204,19 @@ function IdeaCard({ idea, index }: { idea: Idea, index: number }) {
                     </div>
                 </div>
 
-                <div className="lg:w-72 shrink-0 p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col justify-center space-y-6">
+                <div className="lg:w-64 shrink-0 p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col justify-center space-y-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Applicants</span>
-                        <span className="text-lg font-black text-white">{idea.applicants}</span>
+                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-wide">Applicants</span>
+                        <span className="text-lg font-bold text-white">{idea.applicants}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Days Left</span>
-                        <span className="text-lg font-black text-rose-400">{idea.daysLeft}d</span>
+                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-wide">Days Left</span>
+                        <span className="text-lg font-bold text-rose-400">{idea.daysLeft}d</span>
                     </div>
                     <button
                         onClick={handleApply}
                         disabled={applying}
-                        className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed group"
+                        className="w-full py-2.5 bg-white text-black rounded-lg font-bold text-xs hover:bg-primary hover:text-white transition-all shadow-lg shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                         {applying ? "Applying..." : "Join Team"}
                         {!applying && <ArrowRight size={14} className="ml-2 inline-block group-hover:translate-x-1 transition-transform" />}

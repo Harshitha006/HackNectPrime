@@ -40,7 +40,7 @@
   }
 
   body {
-    background-color: #050505;
+    background-color: #08080a;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     min-height: 100vh;
@@ -48,39 +48,38 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    /* Premium Background Glows */
+    /* Subtle Premium Background */
     background-image:
-      radial-gradient(at 0% 0%, hsla(263, 70%, 50%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(280, 70%, 50%, 0.1) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(263, 70%, 50%, 0.05) 0px, transparent 40%),
+      radial-gradient(at 100% 0%, hsla(280, 70%, 50%, 0.03) 0px, transparent 40%);
     background-attachment: fixed;
   }
 }
 
 /* Custom Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.3s ease;
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #2dd4bf 100%);
+  background: linear-gradient(135deg, #a5b4fc 0%, #d8b4fe 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -88,10 +87,10 @@
 }
 
 .cyber-grid {
-  background-size: 50px 50px;
+  background-size: 80px 80px;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
 }
 
 .scrollbar-hide::-webkit-scrollbar {

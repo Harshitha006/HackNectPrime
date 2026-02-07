@@ -34,7 +34,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] cyber-grid flex items-center justify-center p-6">
+        <div className="min-h-screen bg-[#08080a] flex items-center justify-center p-6">
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-[3rem] overflow-hidden glass border border-white/5 shadow-2xl">
 
                 {/* Left Side: Brand/Visual (Same as Signup for consistency) */}
@@ -54,9 +54,9 @@ export default function Login() {
                     </div>
 
                     <div className="space-y-6">
-                        <h2 className="text-4xl font-black text-white leading-tight italic uppercase tracking-tighter">
-                            Resume Your <br />
-                            <span className="text-gradient">Mission Hub</span>
+                        <h2 className="text-3xl font-bold text-white leading-tight">
+                            Welcome Back to <br />
+                            <span className="text-primary">HackNect</span>
                         </h2>
                         <p className="text-white/40 font-medium text-sm max-w-md leading-relaxed">
                             Scan your credentials to re-initialize your dashboard. Your teams are waiting for synchronization.
@@ -69,8 +69,8 @@ export default function Login() {
                                 <Fingerprint size={24} className="group-hover:scale-110 transition-transform" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-white uppercase tracking-tight">Identity Scan</p>
-                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Protocol Active</p>
+                                <p className="text-sm font-bold text-white">Identity Scan</p>
+                                <p className="text-xs text-white/50">Secure Login</p>
                             </div>
                         </div>
                     </div>
@@ -85,8 +85,8 @@ export default function Login() {
                 <div className="bg-black/40 backdrop-blur-3xl p-12 lg:p-20 flex flex-col justify-center">
                     <div className="max-w-md mx-auto w-full space-y-10">
                         <div>
-                            <h1 className="text-3xl font-black text-white mb-2 tracking-tight italic uppercase">Access Portal</h1>
-                            <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Scan mission credentials to proceed</p>
+                            <h1 className="text-2xl font-bold text-white mb-2">Sign In</h1>
+                            <p className="text-white/50 text-sm">Enter your credentials to access your account</p>
                         </div>
 
                         <form className="space-y-6" onSubmit={handleLogin}>
@@ -103,7 +103,7 @@ export default function Login() {
                                 />
                                 <FormInput
                                     icon={<Lock size={18} />}
-                                    label="Access Key"
+                                    label="Password"
                                     type="password"
                                     placeholder="••••••••"
                                     onFocus={() => setIsFocused("password")}
@@ -116,24 +116,24 @@ export default function Login() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" className="w-4 h-4 rounded bg-white/5 border-white/10 text-primary focus:ring-primary ring-offset-black" />
-                                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Stay Synced</label>
+                                    <label className="text-xs text-white/50">Remember me</label>
                                 </div>
-                                <Link href="#" className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline">Forgot Key?</Link>
+                                <Link href="#" className="text-xs text-primary hover:underline">Forgot Password?</Link>
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-4 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isLoading ? "Scanning Credentials..." : "Execute Login"}
+                                {isLoading ? "Logging in..." : "Sign In"}
                                 {!isLoading && <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />}
                             </button>
                         </form>
 
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.3em]"><span className="bg-[#0a0a0a] px-4 text-white/20 uppercase font-sans">External Access</span></div>
+                            <div className="relative flex justify-center text-xs text-white/40 uppercase"><span className="bg-[#0a0a0a] px-4">Or continue with</span></div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,8 +141,8 @@ export default function Login() {
                             <ExternalLoginBtn icon={<div className="w-4 h-4 bg-white/10 rounded-full" />} label="Google" />
                         </div>
 
-                        <p className="text-center text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                            New Recruit? <Link href="/signup" className="text-primary hover:underline">Initialize Account</Link>
+                        <p className="text-center text-xs text-white/40">
+                            Don't have an account? <Link href="/signup" className="text-primary hover:underline">Sign up</Link>
                         </p>
                     </div>
                 </div>
@@ -153,15 +153,15 @@ export default function Login() {
 
 function FormInput({ icon, label, placeholder, type = "text", onFocus, onBlur, isFocused }: any) {
     return (
-        <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-1">{label}</label>
+        <div className="space-y-1.5">
+            <label className="text-xs font-medium text-white/60 ml-1">{label}</label>
             <div className={cn(
-                "relative rounded-2xl border transition-all duration-300",
-                isFocused ? "border-primary bg-primary/5 shadow-lg shadow-primary/5" : "border-white/5 bg-white/5"
+                "relative rounded-xl border transition-all duration-300",
+                isFocused ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-white/10 bg-white/5"
             )}>
                 <div className={cn(
                     "absolute left-4 top-1/2 -translate-y-1/2 transition-colors",
-                    isFocused ? "text-primary" : "text-white/20"
+                    isFocused ? "text-primary" : "text-white/40"
                 )}>
                     {icon}
                 </div>
@@ -179,7 +179,7 @@ function FormInput({ icon, label, placeholder, type = "text", onFocus, onBlur, i
 
 function ExternalLoginBtn({ icon, label }: any) {
     return (
-        <button className="flex items-center justify-center space-x-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest text-white/60">
+        <button className="flex items-center justify-center space-x-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-medium text-xs text-white/70">
             {icon}
             <span>{label}</span>
         </button>

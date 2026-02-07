@@ -20,7 +20,7 @@ import {
     arrayRemove
 } from "firebase/firestore";
 import { db } from "@/services/firebase";
-import { Team, JoinRequest, Hackathon, UserProfile, Match } from "@/types/firebase";
+import { Team, JoinRequest, Hackathon, UserProfile, Match, MentorshipRequest, RequestStatus, ChatMessage } from "@/types/firebase";
 
 // Hook for real-time Teams
 export function useTeams(hackathonId?: string) {
@@ -117,6 +117,91 @@ export function useReceivedRequests(userId: string) {
     return { requests, loading };
 }
 
+// Hook for Mentors
+export function useMentors() {
+    const [mentors, setMentors] = useState<UserProfile[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const q = query(
+            collection(db, "users"),
+            where("role", "==", "mentor")
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const mentorList = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as UserProfile[];
+            setMentors(mentorList);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    return { mentors, loading };
+}
+
+// Hook for Mentorship Requests
+export function useMentorshipRequests(userId: string, role: 'mentor' | 'admin') {
+    const [requests, setRequests] = useState<MentorshipRequest[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!userId) return;
+
+        const field = role === 'mentor' ? 'mentorId' : 'teamAdminId';
+        const q = query(
+            collection(db, "mentorship_requests"),
+            where(field, "==", userId),
+            orderBy("timestamp", "desc")
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const requestList = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as MentorshipRequest[];
+            setRequests(requestList);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [userId, role]);
+
+    return { requests, loading };
+}
+
+// Hook for Chat Messages
+export function useChatMessages(teamId: string) {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!teamId) return;
+
+        const q = query(
+            collection(db, "messages"),
+            where("teamId", "==", teamId),
+            orderBy("timestamp", "asc")
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const messageList = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as ChatMessage[];
+            setMessages(messageList);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [teamId]);
+
+    return { messages, loading };
+}
+
 import { calculateMatchScore } from "@/lib/matchmaking";
 
 // Core Functions for Firestore Actions
@@ -186,10 +271,93 @@ export const firestoreService = {
         });
     },
 
+    // Send Chat Message
+    sendMessage: async (messageData: Partial<ChatMessage> & { teamId: string }) => {
+        const docRef = await addDoc(collection(db, "messages"), {
+            ...messageData,
+            timestamp: serverTimestamp(),
+            createdAt: serverTimestamp(),
+        });
+        return docRef.id;
+    },
+
     // Disband Team
     disbandTeam: async (teamId: string) => {
         const teamRef = doc(db, "teams", teamId);
         await deleteDoc(teamRef);
+    },
+
+    // Send Mentorship Request
+    sendMentorshipRequest: async (requestData: Partial<MentorshipRequest>) => {
+        const docRef = await addDoc(collection(db, "mentorship_requests"), {
+            ...requestData,
+            status: "pending",
+            timestamp: serverTimestamp(),
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        });
+        return docRef.id;
+    },
+
+    // Accept/Reject Mentorship
+    updateMentorshipStatus: async (requestId: string, status: RequestStatus) => {
+        const requestRef = doc(db, "mentorship_requests", requestId);
+        const requestSnap = await getDoc(requestRef);
+        if (!requestSnap.exists()) throw new Error("Request not found");
+        const requestData = requestSnap.data() as MentorshipRequest;
+
+        await updateDoc(requestRef, {
+            status,
+            updatedAt: serverTimestamp(),
+        });
+
+        if (status === 'accepted') {
+            const teamRef = doc(db, "teams", requestData.teamId);
+            await updateDoc(teamRef, {
+                activeMentors: arrayUnion(requestData.mentorId),
+                updatedAt: serverTimestamp()
+            });
+
+            const mentorRef = doc(db, "users", requestData.mentorId);
+            await updateDoc(mentorRef, {
+                mentorFor: arrayUnion(requestData.teamId),
+                updatedAt: serverTimestamp()
+            });
+        }
+    },
+
+    // Find Mentor Matches for a Team
+    findMentorMatches: async (teamId: string) => {
+        const teamDoc = await getDoc(doc(db, "teams", teamId));
+        if (!teamDoc.exists()) return [];
+        const teamData = teamDoc.data() as Team;
+
+        const teamMatchProfile = {
+            id: teamData.id,
+            skills: teamData.skillsNeeded,
+            interests: [teamData.projectIdea],
+            experienceLevel: 3
+        };
+
+        const mentorsSnapshot = await getDocs(query(collection(db, "users"), where("role", "==", "mentor")));
+        const mentors = mentorsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) as UserProfile[];
+
+        const matches = mentors.map(mentor => {
+            const mentorMatchProfile = {
+                id: mentor.uid,
+                skills: mentor.skills,
+                interests: mentor.lookingFor,
+                experienceLevel: mentor.experienceLevel === 'expert' ? 5 : mentor.experienceLevel === 'intermediate' ? 3 : 1
+            };
+            const { score, reasons } = calculateMatchScore(mentorMatchProfile, teamMatchProfile);
+            return {
+                mentor,
+                score,
+                reasons
+            };
+        });
+
+        return matches.sort((a, b) => b.score - a.score);
     },
 
     // Find Matches for a User
