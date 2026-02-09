@@ -1,0 +1,13 @@
+{
+    "name": "hacknect-monorepo",
+    "version": "1.0.0",
+    "description": "AI Hackathon Matchmaking Platform",
+    "scripts": {
+        "dev": "concurrently --kill-others-on-fail -n \"FRONTEND,BACKEND,AI\" -c \"cyan,green,magenta\" \"cd frontend && npm run dev\" \"cd backend && npm run dev\" \"cd ai-service && python main.py\"",
+        "setup": "npm install && cd backend && npm install && cd ../frontend && npm install",
+        "setup-ai": "cd ai-service && python -m venv venv && .\\venv\\Scripts\\pip install -r requirements.txt"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
