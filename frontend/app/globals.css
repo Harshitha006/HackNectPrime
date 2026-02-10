@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #06b6d4;
+  --primary-foreground: #ffffff;
+  --secondary: #e0f2fe;
+  --secondary-foreground: #0e7490;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.card {
+  @apply bg-white shadow-md rounded-lg p-6 border border-gray-200 transition-all hover:shadow-lg;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+.btn-primary {
+  @apply bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#0891b2];
+}
+
+.btn-outline {
+  @apply border border-gray-300 hover:bg-gray-100;
+}
