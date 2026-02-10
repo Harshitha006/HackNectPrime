@@ -8,16 +8,16 @@ if (-not (Test-Path "node_modules")) {
 
 if (-not (Test-Path "backend/node_modules")) {
     Write-Host "Installing backend dependencies..."
-    cd backend
+    Set-Location backend
     npm install
-    cd ..
+    Set-Location ..
 }
 
 if (-not (Test-Path "frontend/node_modules")) {
     Write-Host "Installing frontend dependencies..."
-    cd frontend
+    Set-Location frontend
     npm install
-    cd ..
+    Set-Location ..
 }
 
 # Python setup

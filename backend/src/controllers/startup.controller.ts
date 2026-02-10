@@ -61,4 +61,19 @@ export class StartupController {
             return res.status(500).json({ error: 'Failed to create job posting' });
         }
     }
+
+    async getAllStartups(req: Request, res: Response) {
+        try {
+            const result = await pool.query(
+                `SELECT s.*, u.name as founder_name, u.photo_url 
+                 FROM startups s 
+                 JOIN users u ON s.user_id = u.id 
+                 LIMIT 50`
+            );
+            return res.json({ startups: result.rows });
+        } catch (error) {
+            console.error('Error fetching all startups:', error);
+            return res.status(500).json({ error: 'Failed to fetch startups' });
+        }
+    }
 }
