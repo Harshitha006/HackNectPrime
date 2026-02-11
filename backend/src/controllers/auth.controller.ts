@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import pool, { getIsDemoMode, query } from '../config/database';
 
 let demoOnboarded = false;
+const demoUsers = new Map<string, any>(); // In-memory store for demo mode
 
 export class AuthController {
     async register(req: Request, res: Response) {
@@ -11,7 +12,16 @@ export class AuthController {
             const { name, email, password, userType } = req.body;
 
             if (getIsDemoMode()) {
-                const mockUser = { id: 'demo-user-id', name: name || 'Demo User', email, user_type: userType || 'participant' };
+                const mockUser = {
+                    id: `demo-${Date.now()}`,
+                    name: name || 'Demo User',
+                    email,
+                    user_type: userType || 'participant',
+                    is_onboarded: false,
+                    password: password // Store password plain for demo check
+                };
+                demoUsers.set(email, mockUser);
+
                 const token = jwt.sign(
                     { id: mockUser.id, email: mockUser.email, role: mockUser.user_type },
                     process.env.JWT_SECRET || 'secret',
@@ -56,17 +66,30 @@ export class AuthController {
             const { email, password } = req.body;
 
             if (getIsDemoMode()) {
-                let userType = 'participant';
-                if (email.toLowerCase().includes('startup')) userType = 'startup';
-                if (email.toLowerCase().includes('mentor')) userType = 'mentor';
+                // Try to find in memory first
+                let user = demoUsers.get(email);
 
-                const mockUser = { id: 'demo-user-id', name: 'Demo User', email, user_type: userType };
+                if (!user) {
+                    // Fallback if backend restarted
+                    let userType = 'participant';
+                    if (email.toLowerCase().includes('startup')) userType = 'startup';
+                    if (email.toLowerCase().includes('mentor')) userType = 'mentor';
+
+                    user = {
+                        id: 'demo-user-id',
+                        name: 'Demo User',
+                        email,
+                        user_type: userType,
+                        is_onboarded: true
+                    };
+                }
+
                 const token = jwt.sign(
-                    { id: mockUser.id, email: mockUser.email, role: mockUser.user_type },
+                    { id: user.id, email: user.email, role: user.user_type },
                     process.env.JWT_SECRET || 'secret',
                     { expiresIn: '24h' }
                 );
-                return res.json({ user: mockUser, token });
+                return res.json({ user, token });
             }
 
             // Find user
@@ -143,13 +166,16 @@ export class AuthController {
 
             if (getIsDemoMode()) {
                 const decodedUser = (req as any).user;
+                // Try to find in memory first to get latest state like is_onboarded
+                let storedUser = demoUsers.get(decodedUser.email);
+
                 return res.json({
                     user: {
                         id: userId,
-                        name: 'Demo User',
+                        name: storedUser?.name || 'Demo User',
                         email: decodedUser?.email || 'demo@example.com',
                         user_type: decodedUser?.role || 'participant',
-                        is_onboarded: demoOnboarded
+                        is_onboarded: storedUser ? storedUser.is_onboarded : true // Default to true if falling back
                     }
                 });
             }
@@ -173,7 +199,13 @@ export class AuthController {
             const { name, bio, skills, major, expertise, availability, company, industry } = req.body;
 
             if (getIsDemoMode()) {
-                demoOnboarded = true;
+                const userEmail = (req as any).user.email;
+                const user = demoUsers.get(userEmail);
+                if (user) {
+                    user.is_onboarded = true;
+                    demoUsers.set(userEmail, user);
+                }
+                demoOnboarded = true; // Fallback for the default user
                 return res.json({ success: true });
             }
 
