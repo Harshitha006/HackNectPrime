@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../config/database';
+import { query } from '../config/database';
 
 export class StartupController {
     async getTalentFeed(req: Request, res: Response) {
@@ -7,7 +7,7 @@ export class StartupController {
             // In a real app, only prime users can access this
             const userId = (req as any).user.id;
 
-            const result = await pool.query(
+            const result = await query(
                 `SELECT * FROM v_users_with_profile 
          WHERE user_type = 'participant' AND is_available = TRUE
          LIMIT 20`
@@ -22,7 +22,7 @@ export class StartupController {
 
     async getPrimeTeams(req: Request, res: Response) {
         try {
-            const result = await pool.query(
+            const result = await query(
                 `SELECT * FROM v_teams_full 
          WHERE status = 'active' OR status = 'forming'
          ORDER BY actual_member_count DESC
@@ -42,13 +42,13 @@ export class StartupController {
             const userId = (req as any).user.id;
 
             // Get startup id for this user
-            const startupResult = await pool.query('SELECT id FROM startups WHERE user_id = $1', [userId]);
+            const startupResult = await query('SELECT id FROM startups WHERE user_id = $1', [userId]);
             if (startupResult.rows.length === 0) {
                 return res.status(403).json({ error: 'Startup profile not found' });
             }
             const startupId = startupResult.rows[0].id;
 
-            const result = await pool.query(
+            const result = await query(
                 `INSERT INTO job_postings (startup_id, title, description, required_skills, job_type, location, is_remote, salary_range)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING *`,
@@ -64,7 +64,7 @@ export class StartupController {
 
     async getAllStartups(req: Request, res: Response) {
         try {
-            const result = await pool.query(
+            const result = await query(
                 `SELECT s.*, u.name as founder_name, u.photo_url 
                  FROM startups s 
                  JOIN users u ON s.user_id = u.id 

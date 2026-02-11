@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../config/database';
+import { query } from '../config/database';
 
 export class RequestController {
     async createRequest(req: Request, res: Response) {
@@ -7,7 +7,7 @@ export class RequestController {
             const { teamId, message, pitch, requestType } = req.body;
             const userId = (req as any).user.id;
 
-            const result = await pool.query(
+            const result = await query(
                 `INSERT INTO join_requests (user_id, team_id, request_type, message, pitch)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
@@ -32,7 +32,7 @@ export class RequestController {
             const userId = (req as any).user.id;
 
             // Get requests sent to the user OR teams the user leads
-            const result = await pool.query(
+            const result = await query(
                 `SELECT jr.*, u.display_name as sender_name, t.name as team_name
          FROM join_requests jr
          LEFT JOIN users u ON jr.user_id = u.id

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../config/database';
+import { query } from '../config/database';
 
 export class EventController {
     async getEvents(req: Request, res: Response) {
@@ -13,7 +13,7 @@ export class EventController {
                 params.push(type.toString().toLowerCase());
             }
 
-            const result = await pool.query(queryStr, params);
+            const result = await query(queryStr, params);
             return res.json({ events: result.rows });
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -26,7 +26,7 @@ export class EventController {
             const { eventId, optIn } = req.body;
             const userId = (req as any).user.id;
 
-            const result = await pool.query(
+            const result = await query(
                 `INSERT INTO event_registrations (event_id, user_id, opt_in_notifications)
          VALUES ($1, $2, $3)
          ON CONFLICT (event_id, user_id) DO UPDATE 

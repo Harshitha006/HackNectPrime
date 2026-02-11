@@ -1,4 +1,4 @@
-import pool from '../config/database';
+import { query } from '../config/database';
 
 export interface Team {
     id: string;
@@ -21,7 +21,7 @@ export class TeamService {
             maxMembers = 5, techStack = [], projectDomain
         } = teamData;
 
-        const result = await pool.query(
+        const result = await query(
             `INSERT INTO teams (
         name, description, project_idea, event_id, leader_id, 
         max_members, tech_stack, project_domain
@@ -34,7 +34,7 @@ export class TeamService {
     }
 
     async addMember(teamId: string, userId: string, role: string, isLeader: boolean = false) {
-        await pool.query(
+        await query(
             `INSERT INTO team_members (team_id, user_id, role, is_leader) 
        VALUES ($1, $2, $3, $4)`,
             [teamId, userId, role, isLeader]
@@ -45,18 +45,18 @@ export class TeamService {
         const { limit, offset } = options;
 
         // Using the view created in SQL schema
-        const result = await pool.query(
+        const result = await query(
             `SELECT * FROM v_open_teams 
        ORDER BY created_at DESC 
        LIMIT $1 OFFSET $2`,
             [limit, offset]
         );
 
-        return result.rows.map(row => this.mapToTeam(row));
+        return result.rows.map((row: any) => this.mapToTeam(row));
     }
 
     async getUserProfile(userId: string) {
-        const result = await pool.query(
+        const result = await query(
             `SELECT * FROM v_users_with_profile WHERE id = $1`,
             [userId]
         );

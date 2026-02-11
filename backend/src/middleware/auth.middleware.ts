@@ -1,10 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { getIsDemoMode } from '../config/database';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
+        if (getIsDemoMode()) {
+            console.warn('No token provided. Using Demo User fallback.');
+            (req as any).user = { id: 'demo-user-id', role: 'participant' };
+            return next();
+        }
         return res.status(401).json({ error: 'Unauthorized' });
     }
 

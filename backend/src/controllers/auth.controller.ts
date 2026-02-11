@@ -56,7 +56,11 @@ export class AuthController {
             const { email, password } = req.body;
 
             if (getIsDemoMode()) {
-                const mockUser = { id: 'demo-user-id', name: 'Demo User', email, user_type: 'participant' };
+                let userType = 'participant';
+                if (email.toLowerCase().includes('startup')) userType = 'startup';
+                if (email.toLowerCase().includes('mentor')) userType = 'mentor';
+
+                const mockUser = { id: 'demo-user-id', name: 'Demo User', email, user_type: userType };
                 const token = jwt.sign(
                     { id: mockUser.id, email: mockUser.email, role: mockUser.user_type },
                     process.env.JWT_SECRET || 'secret',
@@ -138,7 +142,16 @@ export class AuthController {
             const userId = (req as any).user.id;
 
             if (getIsDemoMode()) {
-                return res.json({ user: { id: userId, name: 'Demo User', email: 'demo@example.com', user_type: 'participant', is_onboarded: demoOnboarded } });
+                const decodedUser = (req as any).user;
+                return res.json({
+                    user: {
+                        id: userId,
+                        name: 'Demo User',
+                        email: decodedUser?.email || 'demo@example.com',
+                        user_type: decodedUser?.role || 'participant',
+                        is_onboarded: demoOnboarded
+                    }
+                });
             }
 
             const result = await query('SELECT id, name, email, user_type, photo_url, is_onboarded FROM users WHERE id = $1', [userId]);
