@@ -38,7 +38,10 @@ export class TeamController {
             return res.status(201).json({ team });
         } catch (error) {
             console.error('Error creating team:', error);
-            return res.status(500).json({ error: 'Failed to create team' });
+            return res.status(500).json({
+                error: 'Failed to create team',
+                details: error instanceof Error ? error.message : String(error)
+            });
         }
     }
 

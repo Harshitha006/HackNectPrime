@@ -31,7 +31,9 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
         }
 
         if (!response.ok) {
-            throw new Error(data.error || 'Something went wrong');
+            const errorMessage = data.error || 'Something went wrong';
+            const details = data.details ? ` (${data.details})` : '';
+            throw new Error(errorMessage + details);
         }
 
         return data;

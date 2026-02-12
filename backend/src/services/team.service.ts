@@ -30,6 +30,10 @@ export class TeamService {
             [name, description, projectIdea, eventId, leaderId, maxMembers, techStack, projectDomain]
         );
 
+        if (!result.rows || result.rows.length === 0) {
+            throw new Error('Failed to create team: No rows returned from database');
+        }
+
         return this.mapToTeam(result.rows[0]);
     }
 

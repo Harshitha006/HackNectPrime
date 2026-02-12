@@ -5,6 +5,42 @@ dotenv.config();
 
 let isDemoMode = false;
 
+// In-memory store for Demo Mode
+const mockTeams: any[] = [
+    {
+        id: '1',
+        name: 'NeuroLink',
+        description: 'Brain-computer interface for gaming.',
+        project_id: '1',
+        project_idea: 'Use EEG to control movement.',
+        leader_id: 'leader-1',
+        max_members: 5,
+        current_members: 2,
+        status: 'forming',
+        looking_for_members: true,
+        needed_roles: ['Frontend Developer', 'Data Scientist'],
+        all_required_skills: ['React', 'Python'],
+        tech_stack: ['TypeScript', 'Python', 'TensorFlow'],
+        created_at: new Date('2025-01-01')
+    },
+    {
+        id: '2',
+        name: 'EcoSmart',
+        description: 'AI-driven waste management.',
+        project_id: '2',
+        project_idea: 'Smart bins that sort trash.',
+        leader_id: 'leader-2',
+        max_members: 4,
+        current_members: 1,
+        status: 'forming',
+        looking_for_members: true,
+        needed_roles: ['Backend Developer'],
+        all_required_skills: ['Node.js'],
+        tech_stack: ['JavaScript', 'PostgreSQL'],
+        created_at: new Date('2025-01-02')
+    }
+];
+
 const pool = new Pool({
     user: process.env.DB_USER || 'postgres',
     host: process.env.DB_HOST || 'localhost',
@@ -34,7 +70,8 @@ export const getIsDemoMode = () => isDemoMode;
 
 export const query = (text: string, params?: any[]) => {
     if (isDemoMode) {
-        console.warn('Query skipped (Demo Mode):', text);
+        console.warn('Query skipped (Demo Mode):', text.substring(0, 50) + '...');
+        console.log('Full Query:', text);
 
         // Return mock data based on query content
         if (text.includes('v_users_with_profile')) {
@@ -50,39 +87,10 @@ export const query = (text: string, params?: any[]) => {
         }
 
         if (text.includes('v_open_teams')) {
+            // Sort by created_at DESC to match SQL behavior
+            const sortedTeams = [...mockTeams].sort((a, b) => b.created_at - a.created_at);
             return {
-                rows: [
-                    {
-                        id: '1',
-                        name: 'NeuroLink',
-                        description: 'Brain-computer interface for gaming.',
-                        project_id: '1',
-                        project_idea: 'Use EEG to control movement.',
-                        leader_id: 'leader-1',
-                        max_members: 5,
-                        current_members: 2,
-                        status: 'forming',
-                        looking_for_members: true,
-                        needed_roles: ['Frontend Developer', 'Data Scientist'],
-                        all_required_skills: ['React', 'Python'],
-                        tech_stack: ['TypeScript', 'Python', 'TensorFlow']
-                    },
-                    {
-                        id: '2',
-                        name: 'EcoSmart',
-                        description: 'AI-driven waste management.',
-                        project_id: '2',
-                        project_idea: 'Smart bins that sort trash.',
-                        leader_id: 'leader-2',
-                        max_members: 4,
-                        current_members: 1,
-                        status: 'forming',
-                        looking_for_members: true,
-                        needed_roles: ['Backend Developer'],
-                        all_required_skills: ['Node.js'],
-                        tech_stack: ['JavaScript', 'PostgreSQL']
-                    }
-                ]
+                rows: sortedTeams
             } as any;
         }
 
@@ -113,6 +121,40 @@ export const query = (text: string, params?: any[]) => {
                     }
                 ]
             } as any;
+        }
+
+        // Mock INSERT for teams
+        // Mock INSERT for teams
+        // Mock INSERT for teams
+        if (text.toLowerCase().includes('insert into teams')) {
+            console.log('Mocking INSERT team:', params);
+            const newTeam = {
+                id: `demo-team-${Date.now()}`,
+                name: params ? params[0] : 'Demo Team',
+                description: params ? params[1] : '',
+                project_idea: params ? params[2] : '',
+                event_id: params ? params[3] : null,
+                leader_id: params ? params[4] : 'demo-user',
+                max_members: params ? params[5] : 5,
+                tech_stack: params ? params[6] : [],
+                project_domain: params ? params[7] : '',
+                current_members: 1,
+                status: 'forming',
+                looking_for_members: true,
+                needed_roles: [],
+                all_required_skills: [],
+                created_at: new Date(),
+                updated_at: new Date()
+            };
+            mockTeams.unshift(newTeam);
+            return {
+                rows: [newTeam]
+            } as any;
+        }
+
+        // Mock INSERT for other tables (generic success)
+        if (text.includes('INSERT INTO')) {
+            return { rowCount: 1, rows: [] } as any;
         }
 
         return { rows: [] } as any;
