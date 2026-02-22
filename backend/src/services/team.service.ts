@@ -45,16 +45,21 @@ export class TeamService {
         );
     }
 
-    async getOpenTeams(options: { limit: number; offset: number }): Promise<Team[]> {
-        const { limit, offset } = options;
+    async getOpenTeams(options: { limit: number; offset: number; excludeUserId?: string }): Promise<Team[]> {
+        const { limit, offset, excludeUserId } = options;
 
-        // Using the view created in SQL schema
-        const result = await query(
-            `SELECT * FROM v_open_teams 
-       ORDER BY created_at DESC 
-       LIMIT $1 OFFSET $2`,
-            [limit, offset]
-        );
+        let queryText = 'SELECT * FROM v_open_teams';
+        const params: any[] = [];
+
+        if (excludeUserId) {
+            queryText += ' WHERE id NOT IN (SELECT team_id FROM team_members WHERE user_id = $1)';
+            params.push(excludeUserId);
+        }
+
+        queryText += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        params.push(limit, offset);
+
+        const result = await query(queryText, params);
 
         return result.rows.map((row: any) => this.mapToTeam(row));
     }

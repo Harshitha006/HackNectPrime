@@ -82,7 +82,8 @@ The backend is configured to use **PostgreSQL**.
         ```bash
         cd backend
         npm run init-db
-        ```
+        ```+
+        
 
 ---
 
